@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en" data-theme="chalk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hilton Paul | Software Architect & AI Engineer</title>
+<meta name="description" content="Hilton Paul: lead engineer and software architect in Kochi, Kerala with 13 years designing cloud systems, microservices and AI-based applications." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Cabin+Sketch:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  /* Chalkboard (default) */
+  :root, [data-theme="chalk"] {
+    --board: #1f2622;
+    --board-edge: #151a17;
+    --frame: #6b4a2f;
+    --ink: #f3f0e6;
+    --muted: #b9bdb3;
+    --line: rgba(243, 240, 230, 0.35);
+    --yellow: #f8e27a;
+    --pink: #f6a6c8;
+    --blue: #8fd3fe;
+    --green: #a6e3a1;
+    --orange: #ffb37a;
+    --purple: #c9a7ff;
+    --smudge: rgba(255, 255, 255, 0.05);
+    --grain-opacity: 0.18;
+    --hand: "Architects Daughter", "Comic Sans MS", cursive;
+    --sketch: "Cabin Sketch", "Architects Daughter", cursive;
+  }
+  /* Whiteboard */
+  [data-theme="white"] {
+    --board: #f7f7f2;
+    --board-edge: #e9e9e2;
+    --frame: #b8bcc2;
+    --ink: #22252a;
+    --muted: #5d636b;
+    --line: rgba(34, 37, 42, 0.25);
+    --yellow: #b7791f;
+    --pink: #c026d3;
+    --blue: #1d4ed8;
+    --green: #15803d;
+    --orange: #ea580c;
+    --purple: #7c3aed;
+    --smudge: rgba(0, 0, 0, 0.03);
+    --grain-opacity: 0.06;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--hand);
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--ink);
+    background:
+      radial-gradient(ellipse at 20% 15%, var(--smudge), transparent 40%),
+      radial-gradient(ellipse at 80% 60%, var(--smudge), transparent 45%),
+      radial-gradient(ellipse at 40% 90%, var(--smudge), transparent 40%),
+      var(--board);
+    transition: background-color 0.4s, color 0.4s;
+    overflow-x: hidden;
+  }
+  /* Chalk dust grain over the whole board */
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  /* Wooden frame around the board */
+  body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 60;
+    border: 10px solid var(--frame);
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.45);
+  }
+  [data-theme="white"] body::after { box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.08); }
+  @media (max-width: 640px) { body::after { border-width: 6px; } }
+
+  main, nav, footer { position: relative; z-index: 1; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+  @media (min-width: 640px) { .wrap { padding-left: 40px; padding-right: 40px; } }
+
+  .chalky { filter: url(#chalk); }
+  .c-yellow { color: var(--yellow); }
+  .c-pink { color: var(--pink); }
+  .c-blue { color: var(--blue); }
+  .c-green { color: var(--green); }
+  .c-orange { color: var(--orange); }
+  .c-purple { color: var(--purple); }
+  .scribble { text-decoration: underline wavy; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+
+  /* Nav */
+  nav { padding-top: 22px; }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .logo { font-family: var(--sketch); font-size: 26px; font-weight: 700; }
+  .nav-links { display: none; gap: 28px; font-size: 17px; color: var(--muted); }
+  .nav-links a:hover { color: var(--yellow); }
+  @media (min-width: 820px) { .nav-links { display: flex; } }
+  .nav-actions { display: flex; gap: 10px; align-items: center; }
+  .chalk-btn {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    font-family: var(--hand); font-size: 15px; color: var(--ink); background: transparent;
+    border: 2px solid var(--line); padding: 4px 12px;
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    transition: border-color 0.2s, color 0.2s, transform 0.2s;
+  }
+  .chalk-btn:hover { border-color: var(--yellow); color: var(--yellow); transform: rotate(-1deg); }
+  .chalk-btn .hide-sm { display: none; }
+  @media (min-width: 520px) { .chalk-btn .hide-sm { display: inline; } }
+
+  /* Hero */
+  .hero { display: grid; gap: 40px; align-items: center; padding-top: 64px; padding-bottom: 56px; }
+  @media (min-width: 960px) { .hero { grid-template-columns: 1.05fr 1fr; padding-top: 88px; } }
+  .lesson { color: var(--muted); font-size: 17px; margin-bottom: 18px; }
+  .lesson #typed { color: var(--green); }
+  .cursor { display: inline-block; width: 3px; height: 1.05em; background: var(--ink); vertical-align: -3px; margin-left: 2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  h1 { font-family: var(--sketch); font-weight: 700; font-size: clamp(38px, 6.2vw, 68px); line-height: 1.08; }
+  .lead { margin-top: 22px; color: var(--muted); font-size: clamp(17px, 2vw, 20px); max-width: 560px; }
+  .lead strong { color: var(--ink); }
+  .btns { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 32px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 18px; font-family: var(--hand);
+    padding: 10px 22px; border: 2.5px solid var(--ink);
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    transition: transform 0.2s, color 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .btn:hover { transform: rotate(-2deg) scale(1.03); }
+  .btn.primary { border-color: var(--yellow); color: var(--yellow); background: color-mix(in srgb, var(--yellow) 10%, transparent); }
+  .btn.ghost { border-color: var(--line); }
+  .btn.ghost:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* Hero diagram */
+  .diagram-wrap { position: relative; }
+  .diagram-wrap .note {
+    position: absolute; right: 4%; top: -6px; font-size: 15px; color: var(--pink); transform: rotate(4deg);
+  }
+  svg.board-svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .board-svg .box { fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .board-svg .wire { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; opacity: 0.75; stroke-dasharray: 6 7; }
+  .board-svg text { font-family: var(--hand); fill: var(--ink); font-size: 17px; text-anchor: middle; }
+  .board-svg text.small { font-size: 13px; fill: var(--muted); }
+  .board-svg .packet { filter: drop-shadow(0 0 4px currentColor); }
+  .draw { stroke-dasharray: 900; stroke-dashoffset: 900; animation: draw 1.6s ease forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .fade-late { opacity: 0; animation: fadeIn 0.6s ease forwards; }
+  @keyframes fadeIn { to { opacity: 1; } }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; padding-bottom: 40px; }
+  .stat { text-align: left; padding: 6px 0 6px 18px; border-left: 3px solid var(--line); }
+  .stat b { display: block; font-family: var(--sketch); font-size: 44px; line-height: 1.1; }
+  .stat span { color: var(--muted); font-size: 16px; }
+
+  /* Sections */
+  section { padding-top: 88px; padding-bottom: 40px; }
+  .topic { font-size: 17px; color: var(--muted); margin-bottom: 6px; }
+  h2 { font-family: var(--sketch); font-weight: 700; font-size: clamp(32px, 4.6vw, 48px); line-height: 1.15; margin-bottom: 32px; }
+  h2 .scribble { text-decoration-color: var(--yellow); }
+
+  /* About */
+  .about-grid { display: grid; gap: 40px; }
+  @media (min-width: 900px) { .about-grid { grid-template-columns: 1.3fr 1fr; } }
+  .about-grid p { color: var(--muted); margin-bottom: 16px; font-size: 19px; }
+  .about-grid p strong { color: var(--ink); }
+  .toolbox h3 { font-family: var(--sketch); font-size: 24px; margin-bottom: 10px; }
+  .toolbox + .toolbox { margin-top: 26px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip {
+    font-size: 16px; padding: 3px 14px; border: 2px solid currentColor;
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    transition: transform 0.2s;
+  }
+  .chip:hover { transform: rotate(-3deg) scale(1.05); }
+
+  /* System design principles */
+  .principles { display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  .principle {
+    position: relative; padding: 26px 22px 22px; border: 2.5px solid var(--line);
+    border-radius: 255px 18px 225px 18px / 18px 225px 18px 255px;
+    transition: transform 0.25s, border-color 0.25s;
+  }
+  .principle:nth-child(odd) { transform: rotate(-0.8deg); }
+  .principle:nth-child(even) { transform: rotate(0.8deg); }
+  .principle:hover { transform: rotate(0) translateY(-6px); border-color: currentColor; }
+  .principle .icon { width: 44px; height: 44px; margin-bottom: 10px; }
+  .principle h3 { font-family: var(--sketch); font-size: 26px; line-height: 1.2; }
+  .principle p { color: var(--muted); font-size: 17px; margin-top: 6px; }
+  .tradeoff {
+    margin-top: 36px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; font-size: 19px; color: var(--muted);
+  }
+  .tradeoff b { color: var(--ink); font-weight: 400; }
+  .scale { display: inline-flex; align-items: center; gap: 8px; }
+  .scale svg { width: 64px; height: 34px; }
+  .scale .beam { transform-origin: 32px 10px; animation: tilt 4s ease-in-out infinite; }
+  @keyframes tilt { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+
+  /* Contact */
+  .contact { text-align: center; padding: 56px 20px; border: 2.5px dashed var(--line); border-radius: 30px 255px 30px 255px / 255px 30px 255px 30px; }
+  .contact h2 { margin-bottom: 12px; }
+  .contact p { color: var(--muted); max-width: 540px; margin: 0 auto; font-size: 19px; }
+  .contact .btns { justify-content: center; }
+
+  footer { padding: 56px 0 44px; text-align: center; color: var(--muted); font-size: 15px; }
+  .chalk-tray { width: min(420px, 70%); height: 10px; margin: 0 auto 18px; border-radius: 3px; background: var(--frame); position: relative; }
+  .chalk-tray i { position: absolute; top: -6px; width: 34px; height: 7px; border-radius: 3px; }
+
+  /* Scroll reveal */
+  .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .draw { animation: none; stroke-dashoffset: 0; }
+    .fade-late { animation: none; opacity: 1; }
+    .cursor, .scale .beam { animation: none; }
+    .packet { display: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  /* Command palette */
+  .palette-backdrop {
+    position: fixed; inset: 0; z-index: 100; background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(3px);
+    display: none; align-items: flex-start; justify-content: center; padding: 14vh 16px 0;
+  }
+  .palette-backdrop.open { display: flex; }
+  .palette {
+    width: 100%; max-width: 520px; background: var(--board); border: 3px solid var(--frame);
+    border-radius: 12px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); overflow: hidden;
+  }
+  .palette input {
+    width: 100%; padding: 16px 18px; background: transparent; border: 0; border-bottom: 2px dashed var(--line);
+    color: var(--ink); font-size: 19px; font-family: var(--hand); outline: none;
+  }
+  .palette ul { list-style: none; max-height: 340px; overflow-y: auto; padding: 6px; }
+  .palette li { padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; gap: 12px; font-size: 18px; }
+  .palette li small { color: var(--muted); font-size: 14px; }
+  .palette li.active { color: var(--yellow); background: var(--smudge); }
+</style>
+</head>
+<body>
+<!-- Shared SVG filter that roughens edges so text and lines look drawn in chalk -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="chalk">
+    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" result="noise" />
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2" />
+  </filter>
+</svg>
+
+<nav>
+  <div class="wrap">
+    <a href="#top" class="logo chalky">Hilton<span class="c-yellow">.</span>Paul</a>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#design">System Design</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <button class="chalk-btn" id="open-palette" aria-label="Open command menu"><span class="hide-sm">Search</span> Ctrl K</button>
+      <button class="chalk-btn" id="theme-toggle" aria-label="Switch board">Whiteboard</button>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+  <!-- ===== HERO ===== -->
+  <header class="hero wrap">
+    <div>
+      <div class="lesson">Today's lesson: <span id="typed"></span><span class="cursor"></span></div>
+      <h1 class="chalky reveal">I design <span class="c-yellow">systems</span> that <span class="c-blue">scale</span>, and now teach them to <span class="c-pink">think</span>.</h1>
+      <p class="lead reveal">Lead engineer and software architect in <strong>Kochi, Kerala</strong>. <strong>13 years</strong> designing and building cloud systems for insurance, reinsurance, payments and lending. Today I'm focused on <strong>AI-based applications on Azure</strong>: RAG, document intelligence and agents.</p>
+      <div class="btns reveal">
+        <a href="#design" class="btn primary">How I design →</a>
+        <a href="#contact" class="btn ghost">Say hello</a>
+      </div>
+    </div>
+
+    <!-- A chalk-drawn architecture of "me", with requests flowing through it -->
+    <div class="diagram-wrap reveal" aria-label="Hand-drawn system diagram: a request goes from you, through a load balancer, to Cloud, AI agents and Microservices, and ends in production.">
+      <span class="note chalky">← how I work</span>
+      <svg class="board-svg chalky" viewBox="0 0 520 400" role="img">
+        <!-- Client -->
+        <rect class="box draw" x="190" y="12" width="140" height="48" rx="10" stroke="var(--yellow)" />
+        <text x="260" y="42" class="fade-late" style="animation-delay:.4s">you (client)</text>
+
+        <!-- Load balancer -->
+        <rect class="box draw" x="165" y="104" width="190" height="50" rx="10" stroke="var(--green)" style="animation-delay:.2s" />
+        <text x="260" y="134" class="fade-late" style="animation-delay:.6s">Hilton (load balancer)</text>
+
+        <!-- Services -->
+        <rect class="box draw" x="10" y="208" width="140" height="58" rx="10" stroke="var(--blue)" style="animation-delay:.4s" />
+        <text x="80" y="236" class="fade-late" style="animation-delay:.8s">Cloud</text>
+        <text x="80" y="254" class="small fade-late" style="animation-delay:.8s">Azure · AWS</text>
+
+        <rect class="box draw" x="190" y="208" width="140" height="58" rx="10" stroke="var(--pink)" style="animation-delay:.5s" />
+        <text x="260" y="236" class="fade-late" style="animation-delay:.9s">AI Agents</text>
+        <text x="260" y="254" class="small fade-late" style="animation-delay:.9s">RAG · Foundry</text>
+
+        <rect class="box draw" x="370" y="208" width="140" height="58" rx="10" stroke="var(--orange)" style="animation-delay:.6s" />
+        <text x="440" y="236" class="fade-late" style="animation-delay:1s">Microservices</text>
+        <text x="440" y="254" class="small fade-late" style="animation-delay:1s">.NET · Kafka</text>
+
+        <!-- Production database cylinder -->
+        <path class="box draw" d="M195 322 a65 14 0 0 0 130 0 a65 14 0 0 0 -130 0 v48 a65 14 0 0 0 130 0 v-48" stroke="var(--purple)" style="animation-delay:.8s" />
+        <text x="260" y="364" class="fade-late" style="animation-delay:1.2s">production</text>
+
+        <!-- Wires -->
+        <path id="w1" class="wire" d="M260 60 V104" />
+        <path id="w2" class="wire" d="M215 154 C 160 175, 90 180, 80 208" />
+        <path id="w3" class="wire" d="M260 154 V208" />
+        <path id="w4" class="wire" d="M305 154 C 360 175, 430 180, 440 208" />
+        <path id="w5" class="wire" d="M80 266 C 90 300, 170 315, 198 322" />
+        <path id="w6" class="wire" d="M260 266 V308" />
+        <path id="w7" class="wire" d="M440 266 C 430 300, 350 315, 322 322" />
+
+        <!-- Packets travelling along the wires -->
+        <g class="packets fade-late" style="animation-delay:3.1s">
+          <circle r="5" class="packet" fill="var(--yellow)" style="color:var(--yellow)"><animateMotion dur="1.6s" repeatCount="indefinite" begin="1.2s"><mpath href="#w1" /></animateMotion></circle>
+          <circle r="5" class="packet" fill="var(--blue)" style="color:var(--blue)"><animateMotion dur="2.2s" repeatCount="indefinite" begin="1.6s"><mpath href="#w2" /></animateMotion></circle>
+          <circle r="5" class="packet" fill="var(--pink)" style="color:var(--pink)"><animateMotion dur="1.8s" repeatCount="indefinite" begin="1.9s"><mpath href="#w3" /></animateMotion></circle>
+          <circle r="5" class="packet" fill="var(--orange)" style="color:var(--orange)"><animateMotion dur="2.2s" repeatCount="indefinite" begin="2.2s"><mpath href="#w4" /></animateMotion></circle>
+          <circle r="5" class="packet" fill="var(--blue)" style="color:var(--blue)"><animateMotion dur="2s" repeatCount="indefinite" begin="2.6s"><mpath href="#w5" /></animateMotion></circle>
+          <circle r="5" class="packet" fill="var(--pink)" style="color:var(--pink)"><animateMotion dur="1.5s" repeatCount="indefinite" begin="2.8s"><mpath href="#w6" /></animateMotion></circle>
+          <circle r="5" class="packet" fill="var(--orange)" style="color:var(--orange)"><animateMotion dur="2s" repeatCount="indefinite" begin="3s"><mpath href="#w7" /></animateMotion></circle>
+        </g>
+      </svg>
+    </div>
+  </header>
+
+  <div class="stats wrap reveal">
+    <div class="stat"><b class="c-yellow" data-count="13" data-suffix="+">0</b><span>years building software</span></div>
+    <div class="stat"><b class="c-blue" data-count="2">0</b><span>clouds: Azure &amp; AWS</span></div>
+    <div class="stat"><b class="c-pink" data-count="4">0</b><span>domains: insurance, reinsurance, payments, lending</span></div>
+    <div class="stat"><b class="c-green" data-count="3">0</b><span>AWS certifications</span></div>
+  </div>
+
+  <!-- ===== ABOUT ===== -->
+  <section id="about" class="wrap">
+    <div class="topic reveal">Chapter 1</div>
+    <h2 class="chalky reveal">A bit <span class="scribble">about me</span></h2>
+    <div class="about-grid">
+      <div class="reveal">
+        <p>I'm a lead engineer who reaches for a whiteboard before a keyboard. Boxes, arrows and trade-offs first, code second.</p>
+        <p>For 13 years I've owned <strong>system design, technology choices and engineering standards</strong>: microservices and event-driven platforms, modernizing legacy monoliths, and cloud architecture on <strong>Azure and AWS</strong>.</p>
+        <p>Lately I've been building the retrieval side of AI: <strong>document embeddings, vector and hybrid search, and ETL pipelines</strong> that power RAG. Next up is the <strong>Azure AI Apps and Agents</strong> certification (AI-103) and an architect role focused on AI-based applications.</p>
+        <p>I also enjoy mentoring engineers on system design, and I'm learning Go on the side.</p>
+      </div>
+      <div class="reveal">
+        <div class="toolbox">
+          <h3 class="chalky c-yellow">Architecture</h3>
+          <div class="chips c-yellow"><span class="chip">Microservices</span><span class="chip">Event-driven</span><span class="chip">CQRS</span><span class="chip">Modular monolith</span><span class="chip">Kafka &amp; CDC</span></div>
+        </div>
+        <div class="toolbox">
+          <h3 class="chalky c-blue">Cloud & DevOps</h3>
+          <div class="chips c-blue"><span class="chip">Azure</span><span class="chip">AKS</span><span class="chip">AWS</span><span class="chip">Docker</span><span class="chip">Kubernetes</span><span class="chip">Azure DevOps</span></div>
+        </div>
+        <div class="toolbox">
+          <h3 class="chalky c-pink">AI</h3>
+          <div class="chips c-pink"><span class="chip">RAG</span><span class="chip">Vector &amp; hybrid search</span><span class="chip">Azure OpenAI</span><span class="chip">Microsoft Foundry</span><span class="chip">Document Intelligence</span><span class="chip">AI agents</span></div>
+        </div>
+        <div class="toolbox">
+          <h3 class="chalky c-green">Certifications</h3>
+          <div class="chips c-green"><span class="chip">AWS Developer Associate</span><span class="chip">AWS Well-Architected</span><span class="chip">AWS Governance &amp; Compliance</span><span class="chip">AI-103 (in progress)</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SYSTEM DESIGN ===== -->
+  <section id="design" class="wrap">
+    <div class="topic reveal">Chapter 2</div>
+    <h2 class="chalky reveal">How I think about <span class="scribble">system design</span></h2>
+    <div class="principles">
+      <article class="principle reveal c-yellow">
+        <svg class="icon chalky" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="4" y="26" width="10" height="14" rx="2"/><rect x="17" y="16" width="10" height="24" rx="2"/><rect x="30" y="5" width="10" height="35" rx="2"/></svg>
+        <h3 class="chalky">Scale out</h3>
+        <p>Stateless services on Kubernetes, with Redis caching, so traffic spikes are boring.</p>
+      </article>
+      <article class="principle reveal c-green">
+        <svg class="icon chalky" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M22 4 L38 10 V22 C38 31 31 37 22 40 C13 37 6 31 6 22 V10 Z"/><path d="M15 22 L20 27 L30 16"/></svg>
+        <h3 class="chalky">Fail gracefully</h3>
+        <p>Retries with exponential backoff, timeouts and fallbacks. Assume every network call can fail.</p>
+      </article>
+      <article class="principle reveal c-blue">
+        <svg class="icon chalky" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="16" width="10" height="12" rx="2"/><rect x="31" y="6" width="10" height="10" rx="2"/><rect x="31" y="28" width="10" height="10" rx="2"/><path d="M13 22 H22 M22 11 V33 M22 11 H31 M22 33 H31"/></svg>
+        <h3 class="chalky">Events over calls</h3>
+        <p>Kafka, CDC and CQRS keep services loosely coupled and data flowing.</p>
+      </article>
+      <article class="principle reveal c-pink">
+        <svg class="icon chalky" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="19" cy="19" r="12"/><path d="M28 28 L39 39"/><path d="M14 19 H24 M19 14 V24"/></svg>
+        <h3 class="chalky">Ground the AI</h3>
+        <p>Good retrieval first: embeddings plus hybrid search, so answers come from your data.</p>
+      </article>
+    </div>
+    <div class="tradeoff reveal">
+      <span class="scale" aria-hidden="true">
+        <svg viewBox="0 0 64 34" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" class="chalky">
+          <path d="M32 10 V32 M22 32 H42" />
+          <g class="beam"><path d="M8 10 H56" /><path d="M8 10 L3 20 H13 Z" /><path d="M56 10 L51 20 H61 Z" /></g>
+        </svg>
+      </span>
+      <span>Every design is a trade-off: <b class="c-yellow">consistency</b> vs <b class="c-blue">availability</b>, <b class="c-pink">speed</b> vs <b class="c-green">cost</b>. I like making those choices out loud.</span>
+    </div>
+  </section>
+
+  <!-- ===== CONTACT ===== -->
+  <section id="contact" class="wrap">
+    <div class="contact reveal">
+      <div class="topic">Homework</div>
+      <h2 class="chalky">Let's <span class="c-yellow">design</span> something together</h2>
+      <p>Open to architecture and AI roles, collaborations, and long whiteboard sessions about system design.</p>
+      <div class="btns">
+        <a href="mailto:hiltonpaulpaul@gmail.com" class="btn primary">Email me</a>
+        <a href="https://www.linkedin.com/in/hiltonpaulpaul/" target="_blank" rel="noopener" class="btn ghost">LinkedIn</a>
+        <a href="https://github.com/replypaulhilton" target="_blank" rel="noopener" class="btn ghost">GitHub</a>
+        <a href="Hilton_Paul_Resume.pdf" target="_blank" rel="noopener" class="btn ghost">Résumé</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="chalk-tray" aria-hidden="true">
+    <i style="left:12%;background:var(--ink)"></i>
+    <i style="left:34%;background:var(--yellow)"></i>
+    <i style="left:56%;background:var(--pink)"></i>
+    <i style="left:76%;background:var(--blue)"></i>
+  </div>
+  © <span id="year"></span> Hilton Paul · drawn with HTML, CSS & a little chalk dust
+</footer>
+
+<!-- Command palette -->
+<div class="palette-backdrop" id="palette" role="dialog" aria-modal="true" aria-label="Command menu">
+  <div class="palette">
+    <input id="palette-input" placeholder="Where to?" autocomplete="off" />
+    <ul id="palette-list"></ul>
+  </div>
+</div>
+
+<script>
+  // Typing animation for "Today's lesson" — edit these titles
+  const titles = ["Hilton Paul", "Software Architect", "System Design", "Azure AI Engineer"];
+  const typedEl = document.getElementById("typed");
+  let titleIndex = 0, charIndex = 0, deleting = false;
+  function typeLoop() {
+    const word = titles[titleIndex];
+    typedEl.textContent = word.slice(0, charIndex);
+    if (!deleting && charIndex < word.length) charIndex++;
+    else if (deleting && charIndex > 0) charIndex--;
+    else if (!deleting) { deleting = true; return setTimeout(typeLoop, 1600); }
+    else { deleting = false; titleIndex = (titleIndex + 1) % titles.length; }
+    setTimeout(typeLoop, deleting ? 40 : 95);
+  }
+  typeLoop();
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) { entry.target.classList.add("in"); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+
+  // Count-up stats
+  const statObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target, target = +el.dataset.count, suffix = el.dataset.suffix || "", decimals = +(el.dataset.decimals || 0);
+      const start = performance.now();
+      function tick(now) {
+        const progress = Math.min((now - start) / 1400, 1);
+        el.textContent = (target * (1 - Math.pow(1 - progress, 3))).toFixed(decimals) + suffix;
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      statObserver.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll("[data-count]").forEach((el) => statObserver.observe(el));
+
+  // Chalkboard / whiteboard toggle (remembers choice when storage is available)
+  const root = document.documentElement, themeBtn = document.getElementById("theme-toggle");
+  function setTheme(theme) {
+    root.dataset.theme = theme;
+    themeBtn.textContent = theme === "chalk" ? "Whiteboard" : "Chalkboard";
+    try { localStorage.setItem("board", theme); } catch (e) {}
+  }
+  try { setTheme(localStorage.getItem("board") || "chalk"); } catch (e) { setTheme("chalk"); }
+  themeBtn.addEventListener("click", () => setTheme(root.dataset.theme === "chalk" ? "white" : "chalk"));
+
+  // Command palette (Ctrl/Cmd + K)
+  const commands = [
+    { label: "About me", hint: "chapter 1", run: () => location.hash = "#about" },
+    { label: "System design", hint: "chapter 2", run: () => location.hash = "#design" },
+    { label: "Contact me", hint: "homework", run: () => location.hash = "#contact" },
+    { label: "Download résumé", hint: "pdf", run: () => window.open("Hilton_Paul_Resume.pdf", "_blank") },
+    { label: "Open GitHub", hint: "external", run: () => window.open("https://github.com/replypaulhilton", "_blank") },
+    { label: "Switch board", hint: "chalk / white", run: () => themeBtn.click() },
+    { label: "Open LinkedIn", hint: "external", run: () => window.open("https://www.linkedin.com/in/hiltonpaulpaul/", "_blank") },
+    { label: "Copy email", hint: "clipboard", run: () => navigator.clipboard && navigator.clipboard.writeText("hiltonpaulpaul@gmail.com") },
+  ];
+  const palette = document.getElementById("palette"), input = document.getElementById("palette-input"), list = document.getElementById("palette-list");
+  let filtered = commands, active = 0;
+  function render() {
+    list.innerHTML = "";
+    filtered.forEach((cmd, i) => {
+      const li = document.createElement("li");
+      li.className = i === active ? "active" : "";
+      li.innerHTML = `<span>${cmd.label}</span><small>${cmd.hint}</small>`;
+      li.addEventListener("click", () => runCommand(cmd));
+      li.addEventListener("mouseenter", () => { active = i; render(); });
+      list.appendChild(li);
+    });
+  }
+  function openPalette() { palette.classList.add("open"); input.value = ""; filtered = commands; active = 0; render(); input.focus(); }
+  function closePalette() { palette.classList.remove("open"); }
+  function runCommand(cmd) { closePalette(); cmd.run(); }
+  input.addEventListener("input", () => {
+    const q = input.value.toLowerCase();
+    filtered = commands.filter((c) => c.label.toLowerCase().includes(q));
+    active = 0; render();
+  });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown") { active = Math.min(active + 1, filtered.length - 1); render(); e.preventDefault(); }
+    if (e.key === "ArrowUp") { active = Math.max(active - 1, 0); render(); e.preventDefault(); }
+    if (e.key === "Enter" && filtered[active]) runCommand(filtered[active]);
+  });
+  document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); palette.classList.contains("open") ? closePalette() : openPalette(); }
+    if (e.key === "Escape") closePalette();
+  });
+  palette.addEventListener("click", (e) => { if (e.target === palette) closePalette(); });
+  document.getElementById("open-palette").addEventListener("click", openPalette);
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
