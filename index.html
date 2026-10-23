@@ -121,7 +121,7 @@
   .btns { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 32px; }
   .btn {
     display: inline-flex; align-items: center; gap: 8px; font-size: 18px; font-family: var(--hand);
-    padding: 10px 22px; border: 2.5px solid var(--ink);
+    padding: 10px 22px; border: 2.5px solid var(--ink); background: transparent; color: inherit; cursor: pointer;
     border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
     transition: transform 0.2s, color 0.2s, border-color 0.2s, background 0.2s;
   }
@@ -217,6 +217,99 @@
     html { scroll-behavior: auto; }
   }
 
+  /* Illustration in About */
+  .portrait { margin-top: 28px; max-width: 380px; transform: rotate(-1.5deg); }
+  .portrait img {
+    width: 100%; height: auto; display: block; border: 6px solid var(--frame);
+    border-radius: 6px; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  }
+  .portrait figcaption { margin-top: 10px; color: var(--muted); font-size: 16px; text-align: center; }
+
+  /* Guide: animated cartoon teacher + his mini chalkboard */
+  .guide-launch {
+    position: fixed; right: 22px; bottom: 22px; z-index: 70;
+    display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
+    font-family: var(--hand); font-size: 17px; color: #f3f0e6;
+    background: #1f2622; border: 3px solid var(--frame); padding: 10px 18px;
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); transition: transform 0.2s;
+  }
+  .guide-launch:hover { transform: rotate(-2deg) scale(1.04); }
+  .guide-launch .stick { width: 26px; height: 7px; border-radius: 3px; background: #f8e27a; transform: rotate(-30deg); }
+  .guide-launch.hidden { display: none; }
+
+  .guide {
+    position: fixed; right: 18px; bottom: 0; z-index: 71; width: 170px; pointer-events: none;
+    transform: translateX(calc(100% + 40px)); transition: transform 1.8s linear;
+  }
+  .guide.in { transform: translateX(0); }
+  .guide svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .guide .body-group { transform-box: view-box; transform-origin: 100px 270px; }
+  .guide .leg { transform-box: view-box; }
+  .guide #legL { transform-origin: 82px 212px; }
+  .guide #legR { transform-origin: 118px 212px; }
+  .guide #armWrite { transform-box: view-box; transform-origin: 62px 160px; transform: rotate(0deg); transition: transform 0.4s; }
+  .guide #armHold { transform-box: view-box; transform-origin: 138px 160px; }
+  .guide.walking .body-group { animation: bob 0.45s ease-in-out infinite; }
+  .guide.walking #legL { animation: stepA 0.45s ease-in-out infinite alternate; }
+  .guide.walking #legR { animation: stepB 0.45s ease-in-out infinite alternate; }
+  .guide.walking #armHold { animation: stepB 0.45s ease-in-out infinite alternate; }
+  .guide.walking #armWrite { transform: rotate(-70deg); }
+  .guide.writing #armWrite { animation: scribble 0.28s ease-in-out infinite alternate; }
+  .guide.idle .body-group { animation: breathe 3s ease-in-out infinite; }
+  .guide .head { transform-box: view-box; transform-origin: 100px 150px; }
+  .guide.writing .head { animation: nod 0.9s ease-in-out infinite alternate; }
+  .guide.walking .head { animation: nod 0.45s ease-in-out infinite alternate; }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  @keyframes stepA { from { transform: rotate(16deg); } to { transform: rotate(-16deg); } }
+  @keyframes stepB { from { transform: rotate(-16deg); } to { transform: rotate(16deg); } }
+  @keyframes scribble { from { transform: rotate(-4deg) translateX(-2px); } to { transform: rotate(5deg) translateX(3px); } }
+  @keyframes breathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.012); } }
+  @keyframes nod { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+
+  .guide-board {
+    position: fixed; right: 200px; bottom: 120px; z-index: 72; width: min(360px, calc(100vw - 230px));
+    background: #1f2622; color: #f3f0e6; font-family: var(--hand);
+    border: 8px solid #6b4a2f; border-radius: 6px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+    padding: 16px 18px 14px; opacity: 0; transform: translateY(16px) scale(0.97); pointer-events: none;
+    transition: opacity 0.35s, transform 0.35s;
+  }
+  .guide-board.open { opacity: 1; transform: none; pointer-events: auto; }
+  .guide-board .gb-close {
+    position: absolute; top: 4px; right: 8px; background: none; border: 0; color: #b9bdb3;
+    font-family: var(--hand); font-size: 20px; cursor: pointer;
+  }
+  .guide-board .gb-close:hover { color: #f8e27a; }
+  .gb-text { min-height: 120px; max-height: 42vh; overflow-y: auto; font-size: 18px; line-height: 1.55; padding-right: 10px; }
+  .gb-text p { margin-bottom: 4px; }
+  .gb-text .c1 { color: #f8e27a; } .gb-text .c2 { color: #8fd3fe; } .gb-text .c3 { color: #f6a6c8; } .gb-text .c4 { color: #a6e3a1; }
+  .gb-text .me { color: #b9bdb3; text-align: right; }
+  .gb-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .gb-chips button {
+    font-family: var(--hand); font-size: 15px; color: #f3f0e6; background: transparent; cursor: pointer;
+    border: 2px solid rgba(243, 240, 230, 0.4); padding: 2px 12px;
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  }
+  .gb-chips button:hover { border-color: #f8e27a; color: #f8e27a; }
+  .gb-ask { display: flex; gap: 8px; margin-top: 12px; border-top: 2px dashed rgba(243, 240, 230, 0.3); padding-top: 10px; }
+  .gb-ask input {
+    flex: 1; min-width: 0; background: transparent; border: 0; color: #f3f0e6; font-family: var(--hand); font-size: 16px; outline: none;
+  }
+  .gb-ask input::placeholder { color: #8d9188; }
+  .gb-ask button { font-family: var(--hand); background: none; border: 0; color: #f8e27a; font-size: 16px; cursor: pointer; }
+  .gb-ask button:disabled { color: #8d9188; cursor: not-allowed; }
+
+  @media (max-width: 640px) {
+    .guide { width: 112px; right: 6px; }
+    .guide-board { right: 12px; left: 12px; width: auto; bottom: 190px; }
+    .gb-text { max-height: 34vh; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .guide { transition: none; }
+    .guide.walking .body-group, .guide.walking .leg, .guide.walking #armHold,
+    .guide.writing #armWrite, .guide.idle .body-group, .guide .head { animation: none; }
+  }
+
   /* Command palette */
   .palette-backdrop {
     position: fixed; inset: 0; z-index: 100; background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(3px);
@@ -270,7 +363,7 @@
       <p class="lead reveal">Lead engineer and software architect in <strong>Kochi, Kerala</strong>. <strong>13 years</strong> designing and building cloud systems for insurance, reinsurance, payments and lending. Today I'm focused on <strong>AI-based applications on Azure</strong>: RAG, document intelligence and agents.</p>
       <div class="btns reveal">
         <a href="#design" class="btn primary">How I design →</a>
-        <a href="#contact" class="btn ghost">Say hello</a>
+        <button type="button" class="btn ghost" data-tour>Take the tour ✎</button>
       </div>
     </div>
 
@@ -343,6 +436,10 @@
         <p>For 13 years I've owned <strong>system design, technology choices and engineering standards</strong>: microservices and event-driven platforms, modernizing legacy monoliths, and cloud architecture on <strong>Azure and AWS</strong>.</p>
         <p>Lately I've been building the retrieval side of AI: <strong>document embeddings, vector and hybrid search, and ETL pipelines</strong> that power RAG. Next up is the <strong>Azure AI Apps and Agents</strong> certification (AI-103) and an architect role focused on AI-based applications.</p>
         <p>I also enjoy mentoring engineers on system design, and I'm learning Go on the side.</p>
+        <figure class="portrait">
+          <img src="hilton-at-the-board.webp" width="896" height="1195" loading="lazy" alt="Cartoon of Hilton at a blackboard, drawing a load balancer, API gateway and database cluster in colored chalk." />
+          <figcaption class="chalky">Me, at my favorite kind of board.</figcaption>
+        </figure>
       </div>
       <div class="reveal">
         <div class="toolbox">
@@ -428,6 +525,65 @@
   © <span id="year"></span> Hilton Paul · drawn with HTML, CSS & a little chalk dust
 </footer>
 
+<!-- Guide: a cartoon Hilton who walks in and writes on his own little chalkboard -->
+<button class="guide-launch" id="guide-launch" aria-controls="guide-board"><span class="stick" aria-hidden="true"></span>Ask Hilton</button>
+
+<div class="guide" id="guide" aria-hidden="true">
+  <svg viewBox="0 0 200 290">
+    <ellipse cx="100" cy="280" rx="62" ry="7" fill="rgba(0,0,0,0.3)" />
+    <g class="body-group" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Legs -->
+      <g class="leg" id="legL">
+        <rect x="70" y="212" width="24" height="54" rx="6" fill="#4a4a4a" />
+        <ellipse cx="78" cy="270" rx="17" ry="8" fill="#111" />
+      </g>
+      <g class="leg" id="legR">
+        <rect x="106" y="212" width="24" height="54" rx="6" fill="#4a4a4a" />
+        <ellipse cx="122" cy="270" rx="17" ry="8" fill="#111" />
+      </g>
+
+      <!-- Arm holding spare chalk -->
+      <g id="armHold">
+        <path d="M138 164 Q160 190 151 214" fill="none" stroke-width="17" />
+        <path d="M138 164 Q160 190 151 214" fill="none" stroke="#d6d6d6" stroke-width="12" />
+        <rect x="139" y="193" width="6" height="20" rx="2" fill="#f6a6c8" />
+        <rect x="147" y="190" width="6" height="22" rx="2" fill="#8fd3fe" />
+        <rect x="155" y="194" width="6" height="19" rx="2" fill="#f8e27a" />
+        <circle cx="151" cy="217" r="12" fill="#fff" />
+      </g>
+
+      <!-- Arm writing on the board -->
+      <g id="armWrite">
+        <path d="M62 164 Q34 142 34 106" fill="none" stroke-width="17" />
+        <path d="M62 164 Q34 142 34 106" fill="none" stroke="#d6d6d6" stroke-width="12" />
+        <rect x="10" y="92" width="22" height="7" rx="3" fill="#8fd3fe" transform="rotate(-20 21 95)" />
+        <circle cx="34" cy="100" r="12" fill="#fff" />
+      </g>
+
+      <!-- T-shirt -->
+      <path d="M56 160 Q100 146 144 160 L150 222 Q100 232 50 222 Z" fill="#151515" />
+      <ellipse cx="58" cy="170" rx="11" ry="14" fill="#151515" />
+      <ellipse cx="142" cy="170" rx="11" ry="14" fill="#151515" />
+      <rect x="89" y="136" width="22" height="20" rx="4" fill="#d6d6d6" />
+
+      <!-- Head: Hilton's own face, cut from his illustration -->
+      <g class="head">
+        <image href="hilton-face.png" x="48" y="18" width="104" height="135" />
+      </g>
+    </g>
+  </svg>
+</div>
+
+<div class="guide-board" id="guide-board" role="dialog" aria-label="Hilton's chalkboard">
+  <button class="gb-close" id="gb-close" aria-label="Close">✕</button>
+  <div class="gb-text" id="gb-text" aria-live="polite"></div>
+  <div class="gb-chips" id="gb-chips"></div>
+  <form class="gb-ask" id="gb-ask">
+    <input id="gb-input" placeholder="Ask me anything…" autocomplete="off" aria-label="Ask Hilton a question" />
+    <button type="submit">Ask</button>
+  </form>
+</div>
+
 <!-- Command palette -->
 <div class="palette-backdrop" id="palette" role="dialog" aria-modal="true" aria-label="Command menu">
   <div class="palette">
@@ -492,6 +648,8 @@
     { label: "About me", hint: "chapter 1", run: () => location.hash = "#about" },
     { label: "System design", hint: "chapter 2", run: () => location.hash = "#design" },
     { label: "Contact me", hint: "homework", run: () => location.hash = "#contact" },
+    { label: "Take the tour", hint: "guide", run: () => HiltonGuide.tour() },
+    { label: "Ask Hilton", hint: "chalkboard", run: () => HiltonGuide.open() },
     { label: "Download résumé", hint: "pdf", run: () => window.open("Hilton_Paul_Resume.pdf", "_blank") },
     { label: "Open GitHub", hint: "external", run: () => window.open("https://github.com/replypaulhilton", "_blank") },
     { label: "Switch board", hint: "chalk / white", run: () => themeBtn.click() },
@@ -532,6 +690,150 @@
   document.getElementById("open-palette").addEventListener("click", openPalette);
 
   document.getElementById("year").textContent = new Date().getFullYear();
+
+  // Guide: cartoon Hilton walks in, then writes on his chalkboard.
+  // To plug in a real chatbot later, call:
+  //   HiltonGuide.setResponder(async (question) => "answer text")
+  const HiltonGuide = (() => {
+    const guideEl = document.getElementById("guide");
+    const board = document.getElementById("guide-board");
+    const textEl = document.getElementById("gb-text");
+    const chipsEl = document.getElementById("gb-chips");
+    const launch = document.getElementById("guide-launch");
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const WALK_MS = reduceMotion ? 0 : 1800;
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    let isOpen = false, runId = 0;
+
+    const tourSteps = [
+      { target: "#top", lines: [["Hi, I'm Hilton! 👋", "c1"], ["Welcome to my board."], ["13 years designing and building systems, from Kochi, Kerala."]] },
+      { target: "#about", lines: [["Chapter 1: about me", "c2"], ["I design microservices and event-driven systems on Azure and AWS."], ["Lately: RAG, embeddings and AI agents."]] },
+      { target: "#design", lines: [["Chapter 2: system design", "c3"], ["Scale out. Fail gracefully."], ["Prefer events over calls."], ["Ground the AI in your own data."]] },
+      { target: "#contact", lines: [["Homework!", "c4"], ["Let's design something together."], ["hiltonpaulpaul@gmail.com"]] },
+    ];
+
+    const quickAnswers = {
+      "What do you do?": [["I'm a lead engineer and software architect.", "c1"], ["I own system design and tech choices, and these days I build AI apps on Azure."]],
+      "Favorite pattern?": [["Event-driven + CQRS.", "c2"], ["Kafka and CDC keep services loosely coupled, and reads stay fast."]],
+      "How do I reach you?": [["Email is best:", "c4"], ["hiltonpaulpaul@gmail.com"], ["or LinkedIn: hiltonpaulpaul"]],
+    };
+
+    // Default answer until a real chatbot is connected
+    let responder = async () => "My AI assistant is still learning. Coming soon! Meanwhile, try the tour.";
+
+    async function walk(ms = 900) {
+      guideEl.classList.remove("idle", "writing");
+      guideEl.classList.add("walking");
+      await wait(reduceMotion ? 0 : ms);
+      guideEl.classList.remove("walking");
+      guideEl.classList.add("idle");
+    }
+
+    async function write(lines, { append = false } = {}) {
+      const id = ++runId;
+      if (!append) textEl.innerHTML = "";
+      guideEl.classList.add("writing");
+      for (const [line, cls] of lines) {
+        const p = document.createElement("p");
+        if (cls) p.className = cls;
+        textEl.appendChild(p);
+        for (const ch of line) {
+          if (id !== runId) return false;
+          p.textContent += ch;
+          textEl.scrollTop = textEl.scrollHeight;
+          if (!reduceMotion) await wait(ch === " " ? 18 : 32);
+        }
+        if (!reduceMotion) await wait(220);
+      }
+      if (id === runId) guideEl.classList.remove("writing");
+      return id === runId;
+    }
+
+    function setChips(list) {
+      chipsEl.innerHTML = "";
+      list.forEach(([label, fn]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = label;
+        b.addEventListener("click", fn);
+        chipsEl.appendChild(b);
+      });
+    }
+
+    function menuChips() {
+      setChips([
+        ["Take the tour", () => tour()],
+        ...Object.keys(quickAnswers).map((q) => [q, () => answer(q, quickAnswers[q])]),
+      ]);
+    }
+
+    async function answer(question, lines) {
+      setChips([]);
+      textEl.innerHTML = "";
+      if (question) {
+        const me = document.createElement("p");
+        me.className = "me";
+        me.textContent = question;
+        textEl.appendChild(me);
+      }
+      await write(lines, { append: true });
+      menuChips();
+    }
+
+    async function open({ greet = true } = {}) {
+      if (isOpen) return;
+      isOpen = true;
+      launch.classList.add("hidden");
+      guideEl.classList.add("in", "walking");
+      await wait(WALK_MS);
+      guideEl.classList.remove("walking");
+      guideEl.classList.add("idle");
+      board.classList.add("open");
+      if (!greet) return;
+      menuChips();
+      await write([["Hi, I'm Hilton! 👋", "c1"], ["Pick a question, ask your own, or let me walk you through the site."]]);
+    }
+
+    async function close() {
+      runId++;
+      isOpen = false;
+      board.classList.remove("open");
+      guideEl.classList.remove("idle", "writing", "in");
+      guideEl.classList.add("walking");
+      await wait(WALK_MS);
+      guideEl.classList.remove("walking");
+      launch.classList.remove("hidden");
+    }
+
+    async function tour(step = 0) {
+      if (!isOpen) await open({ greet: false });
+      const s = tourSteps[step];
+      setChips([]);
+      document.querySelector(s.target).scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
+      await walk();
+      const done = await write(s.lines);
+      if (!done) return;
+      const last = step === tourSteps.length - 1;
+      setChips(last
+        ? [["Start over", () => tour(0)], ["Back to questions", () => { textEl.innerHTML = ""; menuChips(); }]]
+        : [["Next →", () => tour(step + 1)], ["End tour", () => { runId++; textEl.innerHTML = ""; menuChips(); }]]);
+    }
+
+    document.getElementById("gb-ask").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = document.getElementById("gb-input");
+      const q = input.value.trim();
+      if (!q) return;
+      input.value = "";
+      const reply = await responder(q);
+      answer(q, [[reply]]);
+    });
+    launch.addEventListener("click", () => open());
+    document.getElementById("gb-close").addEventListener("click", close);
+    document.querySelectorAll("[data-tour]").forEach((b) => b.addEventListener("click", () => tour(0)));
+
+    return { open, close, tour, say: (text) => answer("", [[text]]), setResponder: (fn) => { responder = fn; } };
+  })();
 </script>
 </body>
 </html>
