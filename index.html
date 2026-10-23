@@ -244,12 +244,13 @@
   }
   .guide.in { transform: translateX(0); }
   .guide svg { width: 100%; height: auto; display: block; overflow: visible; }
-  .guide .body-group { transform-box: view-box; transform-origin: 100px 270px; }
+  .guide .body-group { transform-box: view-box; transform-origin: 100px 285px; }
+  .guide .figure { filter: drop-shadow(2px 0 0 #f3f0e6) drop-shadow(-2px 0 0 #f3f0e6) drop-shadow(0 2px 0 #f3f0e6) drop-shadow(0 -2px 0 #f3f0e6) drop-shadow(0 8px 10px rgba(0,0,0,0.35)); }
   .guide .leg { transform-box: view-box; }
-  .guide #legL { transform-origin: 82px 212px; }
-  .guide #legR { transform-origin: 118px 212px; }
-  .guide #armWrite { transform-box: view-box; transform-origin: 62px 160px; transform: rotate(0deg); transition: transform 0.4s; }
-  .guide #armHold { transform-box: view-box; transform-origin: 138px 160px; }
+  .guide #legL { transform-origin: 85px 228px; }
+  .guide #legR { transform-origin: 115px 228px; }
+  .guide #armWrite { transform-box: view-box; transform-origin: 52px 172px; transform: rotate(0deg); transition: transform 0.4s; }
+  .guide #armHold { transform-box: view-box; transform-origin: 148px 172px; }
   .guide.walking .body-group { animation: bob 0.45s ease-in-out infinite; }
   .guide.walking #legL { animation: stepA 0.45s ease-in-out infinite alternate; }
   .guide.walking #legR { animation: stepB 0.45s ease-in-out infinite alternate; }
@@ -257,7 +258,7 @@
   .guide.walking #armWrite { transform: rotate(-70deg); }
   .guide.writing #armWrite { animation: scribble 0.28s ease-in-out infinite alternate; }
   .guide.idle .body-group { animation: breathe 3s ease-in-out infinite; }
-  .guide .head { transform-box: view-box; transform-origin: 100px 150px; }
+  .guide .head { transform-box: view-box; transform-origin: 100px 128px; }
   .guide.writing .head { animation: nod 0.9s ease-in-out infinite alternate; }
   .guide.walking .head { animation: nod 0.45s ease-in-out infinite alternate; }
   @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
@@ -529,47 +530,57 @@
 <button class="guide-launch" id="guide-launch" aria-controls="guide-board"><span class="stick" aria-hidden="true"></span>Ask Hilton</button>
 
 <div class="guide" id="guide" aria-hidden="true">
-  <svg viewBox="0 0 200 290">
-    <ellipse cx="100" cy="280" rx="62" ry="7" fill="rgba(0,0,0,0.3)" />
-    <g class="body-group" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <svg viewBox="0 0 200 300">
+    <ellipse cx="100" cy="290" rx="60" ry="6" fill="rgba(0,0,0,0.35)" />
+    <g class="figure">
+    <g class="body-group" stroke="#111" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
       <!-- Legs -->
       <g class="leg" id="legL">
-        <rect x="70" y="212" width="24" height="54" rx="6" fill="#4a4a4a" />
-        <ellipse cx="78" cy="270" rx="17" ry="8" fill="#111" />
+        <path d="M72 226 L74 274 L96 274 L98 226 Z" fill="#3a3a3a" />
+        <path d="M60 282 Q60 270 76 270 L96 270 Q100 282 92 284 L64 285 Q60 285 60 282 Z" fill="#1a1a1a" />
+        <path d="M70 274 Q76 272 82 274" fill="none" stroke="#777" stroke-width="2" />
       </g>
       <g class="leg" id="legR">
-        <rect x="106" y="212" width="24" height="54" rx="6" fill="#4a4a4a" />
-        <ellipse cx="122" cy="270" rx="17" ry="8" fill="#111" />
+        <path d="M102 226 L104 274 L126 274 L128 226 Z" fill="#3a3a3a" />
+        <path d="M104 270 L124 270 Q140 270 140 282 Q140 285 136 285 L108 284 Q100 282 104 270 Z" fill="#1a1a1a" />
+        <path d="M118 274 Q124 272 130 274" fill="none" stroke="#777" stroke-width="2" />
       </g>
 
       <!-- Arm holding spare chalk -->
       <g id="armHold">
-        <path d="M138 164 Q160 190 151 214" fill="none" stroke-width="17" />
-        <path d="M138 164 Q160 190 151 214" fill="none" stroke="#d6d6d6" stroke-width="12" />
-        <rect x="139" y="193" width="6" height="20" rx="2" fill="#f6a6c8" />
-        <rect x="147" y="190" width="6" height="22" rx="2" fill="#8fd3fe" />
-        <rect x="155" y="194" width="6" height="19" rx="2" fill="#f8e27a" />
-        <circle cx="151" cy="217" r="12" fill="#fff" />
+        <path d="M150 176 Q166 200 158 224" fill="none" stroke-width="16" />
+        <path d="M150 176 Q166 200 158 224" fill="none" stroke="#d6d6d6" stroke-width="10" />
+        <rect x="146" y="205" width="6" height="20" rx="2" fill="#f6a6c8" stroke-width="2" />
+        <rect x="154" y="202" width="6" height="22" rx="2" fill="#8fd3fe" stroke-width="2" />
+        <rect x="162" y="206" width="6" height="19" rx="2" fill="#f8e27a" stroke-width="2" />
+        <path d="M146 224 Q146 236 158 237 Q171 236 170 224 Q170 216 158 216 Q146 216 146 224 Z" fill="#fff" />
+        <path d="M150 222 H166 M150 228 H166" fill="none" stroke-width="1.5" />
       </g>
 
       <!-- Arm writing on the board -->
       <g id="armWrite">
-        <path d="M62 164 Q34 142 34 106" fill="none" stroke-width="17" />
-        <path d="M62 164 Q34 142 34 106" fill="none" stroke="#d6d6d6" stroke-width="12" />
-        <rect x="10" y="92" width="22" height="7" rx="3" fill="#8fd3fe" transform="rotate(-20 21 95)" />
-        <circle cx="34" cy="100" r="12" fill="#fff" />
+        <path d="M50 176 Q30 150 32 112" fill="none" stroke-width="16" />
+        <path d="M50 176 Q30 150 32 112" fill="none" stroke="#d6d6d6" stroke-width="10" />
+        <rect x="8" y="94" width="24" height="8" rx="3" fill="#8fd3fe" transform="rotate(-25 20 98)" stroke-width="2" />
+        <path d="M20 104 Q18 92 30 90 Q44 90 44 102 Q44 114 32 115 Q21 114 20 104 Z" fill="#fff" />
+        <path d="M26 100 Q32 96 38 100" fill="none" stroke-width="1.5" />
       </g>
 
-      <!-- T-shirt -->
-      <path d="M56 160 Q100 146 144 160 L150 222 Q100 232 50 222 Z" fill="#151515" />
-      <ellipse cx="58" cy="170" rx="11" ry="14" fill="#151515" />
-      <ellipse cx="142" cy="170" rx="11" ry="14" fill="#151515" />
-      <rect x="89" y="136" width="22" height="20" rx="4" fill="#d6d6d6" />
+      <!-- T-shirt with short sleeves -->
+      <path d="M54 150 Q60 138 80 136 L120 136 Q140 138 146 150 L152 230 Q100 240 48 230 Z" fill="#1b1b1b" />
+      <path d="M54 150 L38 178 Q48 186 62 182 L66 162" fill="#1b1b1b" />
+      <path d="M146 150 L162 178 Q152 186 138 182 L134 162" fill="#1b1b1b" />
+      <path d="M70 160 Q72 196 66 222 M130 160 Q128 196 134 222" fill="none" stroke="#3a3a3a" stroke-width="2" />
+
+      <!-- Neck and collar -->
+      <path d="M88 118 L88 138 Q100 150 112 138 L112 118 Z" fill="#d6d6d6" />
+      <path d="M84 136 Q100 154 116 136" fill="none" stroke-width="3" />
 
       <!-- Head: Hilton's own face, cut from his illustration -->
       <g class="head">
-        <image href="hilton-face.png" x="48" y="18" width="104" height="135" />
+        <image href="hilton-face.png" x="52" y="4" width="96" height="124" stroke="none" />
       </g>
+    </g>
     </g>
   </svg>
 </div>
