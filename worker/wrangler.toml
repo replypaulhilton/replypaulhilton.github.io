@@ -1,0 +1,12 @@
+name = "hilton-chat"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+# Groq model used for answers. See https://console.groq.com/docs/models for current options.
+MODEL = "openai/gpt-oss-120b"
+# Only these sites may call the chatbot (comma-separated, no trailing slash)
+ALLOWED_ORIGINS = "https://replypaulhilton.github.io,http://localhost:8742"
+
+# The Groq API key is a secret, never stored in this file:
+#   npx wrangler secret put GROQ_API_KEY

@@ -272,7 +272,7 @@
     position: fixed; right: 200px; bottom: 120px; z-index: 72; width: min(360px, calc(100vw - 230px));
     background: #1f2622; color: #f3f0e6; font-family: var(--hand);
     border: 8px solid #6b4a2f; border-radius: 6px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
-    padding: 16px 18px 14px; opacity: 0; transform: translateY(16px) scale(0.97); pointer-events: none;
+    padding: 34px 18px 14px; opacity: 0; transform: translateY(16px) scale(0.97); pointer-events: none;
     transition: opacity 0.35s, transform 0.35s;
   }
   .guide-board.open { opacity: 1; transform: none; pointer-events: auto; }
@@ -281,6 +281,13 @@
     font-family: var(--hand); font-size: 20px; cursor: pointer;
   }
   .guide-board .gb-close:hover { color: #f8e27a; }
+  .guide-board .gb-voice {
+    position: absolute; top: 6px; right: 38px; background: none; border: 0; font-size: 16px; cursor: pointer; opacity: 0.85;
+  }
+  .guide-board .gb-voice[aria-pressed="false"] { opacity: 0.45; }
+  .gb-text .thinking { color: #b9bdb3; font-style: italic; }
+  .gb-text .thinking::after { content: ""; animation: dots 1.2s steps(4) infinite; }
+  @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
   .gb-text { min-height: 120px; max-height: 42vh; overflow-y: auto; font-size: 18px; line-height: 1.55; padding-right: 10px; }
   .gb-text p { margin-bottom: 4px; }
   .gb-text .c1 { color: #f8e27a; } .gb-text .c2 { color: #8fd3fe; } .gb-text .c3 { color: #f6a6c8; } .gb-text .c4 { color: #a6e3a1; }
@@ -586,11 +593,12 @@
 </div>
 
 <div class="guide-board" id="guide-board" role="dialog" aria-label="Hilton's chalkboard">
+  <button class="gb-voice" id="gb-voice" aria-pressed="true" aria-label="Read answers aloud" title="Read answers aloud">🔊</button>
   <button class="gb-close" id="gb-close" aria-label="Close">✕</button>
   <div class="gb-text" id="gb-text" aria-live="polite"></div>
   <div class="gb-chips" id="gb-chips"></div>
   <form class="gb-ask" id="gb-ask">
-    <input id="gb-input" placeholder="Ask me anything…" autocomplete="off" aria-label="Ask Hilton a question" />
+    <input id="gb-input" placeholder="Ask me about system design…" autocomplete="off" maxlength="500" aria-label="Ask Hilton a question" />
     <button type="submit">Ask</button>
   </form>
 </div>
@@ -702,8 +710,11 @@
 
   document.getElementById("year").textContent = new Date().getFullYear();
 
+  // Chatbot: your Cloudflare Worker URL (ends in /chat). Leave empty to show the "coming soon" reply.
+  const CHAT_ENDPOINT = "https://hilton-chat.hiltonpaul.workers.dev/chat";
+
   // Guide: cartoon Hilton walks in, then writes on his chalkboard.
-  // To plug in a real chatbot later, call:
+  // Answers come from CHAT_ENDPOINT, or swap the source with:
   //   HiltonGuide.setResponder(async (question) => "answer text")
   const HiltonGuide = (() => {
     const guideEl = document.getElementById("guide");
@@ -729,8 +740,67 @@
       "How do I reach you?": [["Email is best:", "c4"], ["hiltonpaulpaul@gmail.com"], ["or LinkedIn: hiltonpaulpaul"]],
     };
 
-    // Default answer until a real chatbot is connected
-    let responder = async () => "My AI assistant is still learning. Coming soon! Meanwhile, try the tour.";
+    // Read the board aloud with the browser's built-in voice (free, no service needed)
+    const voice = (() => {
+      const synth = window.speechSynthesis;
+      let on = true, chosen = null;
+      try { on = localStorage.getItem("voice") !== "off"; } catch (e) {}
+      function pick() {
+        const vs = synth ? synth.getVoices() : [];
+        chosen = vs.find((v) => /en-IN/i.test(v.lang) && /male|ravi|prabhat/i.test(v.name))
+          || vs.find((v) => /en-IN/i.test(v.lang))
+          || vs.find((v) => /^en/i.test(v.lang) && /male|david|daniel|guy|ryan/i.test(v.name))
+          || vs.find((v) => /^en/i.test(v.lang)) || null;
+      }
+      if (synth) { pick(); synth.addEventListener("voiceschanged", pick); }
+      const stop = () => synth && synth.cancel();
+      return {
+        get on() { return on; },
+        toggle() { on = !on; try { localStorage.setItem("voice", on ? "on" : "off"); } catch (e) {} if (!on) stop(); return on; },
+        speak(text) {
+          if (!synth || !on || !text) return;
+          stop();
+          const u = new SpeechSynthesisUtterance(text.replace(/\s*→\s*/g, ", then ").replace(/[👋✎]/gu, ""));
+          if (chosen) u.voice = chosen;
+          u.rate = 1.02;
+          synth.speak(u);
+        },
+        stop,
+      };
+    })();
+
+    // Ask the Cloudflare Worker, remembering the last few turns so follow-ups make sense
+    let history = [];
+    async function askWorker(question) {
+      try {
+        const res = await fetch(CHAT_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question, history }),
+          signal: AbortSignal.timeout(30000),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 429) return "Lots of questions right now! Give me a minute and ask again.";
+        if (!res.ok || !data.answer) throw new Error(data.error || res.status);
+        history = [...history, { role: "user", content: question }, { role: "assistant", content: data.answer }].slice(-6);
+        return data.answer;
+      } catch (e) {
+        return "Oops, my chalk broke. Please try again, or email me at hiltonpaulpaul@gmail.com.";
+      }
+    }
+    let responder = CHAT_ENDPOINT
+      ? askWorker
+      : async () => "My AI assistant is still learning. Coming soon! Meanwhile, try the tour.";
+
+    // Turn a plain-text answer into chalk lines; strip any stray markdown
+    function toLines(text) {
+      return text
+        .replace(/\*\*|__|`/g, "")
+        .split(/\n+/)
+        .map((l) => l.replace(/^#+\s*/, "").replace(/^[-*]\s+/, "• ").trim())
+        .filter(Boolean)
+        .map((l, i) => (i === 0 ? [l, "c1"] : [l]));
+    }
 
     async function walk(ms = 900) {
       guideEl.classList.remove("idle", "writing");
@@ -744,6 +814,10 @@
       const id = ++runId;
       if (!append) textEl.innerHTML = "";
       guideEl.classList.add("writing");
+      voice.speak(lines
+        .map(([l]) => l.replace(/[👋✎]/gu, "").trim())
+        .map((l) => (/[.!?:]$/.test(l) ? l : l + "."))
+        .join(" "));
       for (const [line, cls] of lines) {
         const p = document.createElement("p");
         if (cls) p.className = cls;
@@ -778,15 +852,18 @@
       ]);
     }
 
-    async function answer(question, lines) {
+    function showQuestion(question) {
       setChips([]);
       textEl.innerHTML = "";
-      if (question) {
-        const me = document.createElement("p");
-        me.className = "me";
-        me.textContent = question;
-        textEl.appendChild(me);
-      }
+      if (!question) return;
+      const me = document.createElement("p");
+      me.className = "me";
+      me.textContent = question;
+      textEl.appendChild(me);
+    }
+
+    async function answer(question, lines) {
+      showQuestion(question);
       await write(lines, { append: true });
       menuChips();
     }
@@ -807,6 +884,7 @@
 
     async function close() {
       runId++;
+      voice.stop();
       isOpen = false;
       board.classList.remove("open");
       guideEl.classList.remove("idle", "writing", "in");
@@ -830,20 +908,43 @@
         : [["Next →", () => tour(step + 1)], ["End tour", () => { runId++; textEl.innerHTML = ""; menuChips(); }]]);
     }
 
-    document.getElementById("gb-ask").addEventListener("submit", async (e) => {
+    const askForm = document.getElementById("gb-ask");
+    askForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const input = document.getElementById("gb-input");
       const q = input.value.trim();
       if (!q) return;
       input.value = "";
+      const id = ++runId;
+      voice.stop();
+      showQuestion(q);
+      const thinking = document.createElement("p");
+      thinking.className = "thinking";
+      thinking.textContent = "Hmm, let me think";
+      textEl.appendChild(thinking);
+      guideEl.classList.add("writing");
+      askForm.querySelectorAll("input, button").forEach((el) => (el.disabled = true));
       const reply = await responder(q);
-      answer(q, [[reply]]);
+      askForm.querySelectorAll("input, button").forEach((el) => (el.disabled = false));
+      if (id !== runId) return;
+      thinking.remove();
+      await write(toLines(reply), { append: true });
+      menuChips();
+      input.focus();
     });
+
+    const voiceBtn = document.getElementById("gb-voice");
+    const showVoice = () => {
+      voiceBtn.textContent = voice.on ? "🔊" : "🔇";
+      voiceBtn.setAttribute("aria-pressed", String(voice.on));
+    };
+    voiceBtn.addEventListener("click", () => { voice.toggle(); showVoice(); });
+    showVoice();
     launch.addEventListener("click", () => open());
     document.getElementById("gb-close").addEventListener("click", close);
     document.querySelectorAll("[data-tour]").forEach((b) => b.addEventListener("click", () => tour(0)));
 
-    return { open, close, tour, say: (text) => answer("", [[text]]), setResponder: (fn) => { responder = fn; } };
+    return { open, close, tour, say: (text) => answer("", toLines(text)), setResponder: (fn) => { responder = fn; } };
   })();
 </script>
 </body>
