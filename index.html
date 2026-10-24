@@ -286,6 +286,9 @@
   }
   .guide-board .gb-voice[aria-pressed="false"] { opacity: 0.45; }
   .gb-text .thinking { color: #b9bdb3; font-style: italic; }
+  .gb-diagram { margin: 4px 0 12px; }
+  .gb-diagram svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .gb-diagram .gb-label { font-family: var(--hand); font-size: 12.5px; opacity: 0; animation: fadeIn 0.3s ease forwards; }
   .gb-text .thinking::after { content: ""; animation: dots 1.2s steps(4) infinite; }
   @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
   .gb-text { min-height: 120px; max-height: 42vh; overflow-y: auto; font-size: 18px; line-height: 1.55; padding-right: 10px; }
@@ -758,12 +761,16 @@
         get on() { return on; },
         toggle() { on = !on; try { localStorage.setItem("voice", on ? "on" : "off"); } catch (e) {} if (!on) stop(); return on; },
         speak(text) {
-          if (!synth || !on || !text) return;
+          if (!synth || !on || !text) return Promise.resolve();
           stop();
           const u = new SpeechSynthesisUtterance(text.replace(/\s*→\s*/g, ", then ").replace(/[👋✎]/gu, ""));
           if (chosen) u.voice = chosen;
           u.rate = 1.02;
-          synth.speak(u);
+          // Resolves when the sentence finishes (or is cut off), so drawing can wait for narration
+          return new Promise((resolve) => {
+            u.onend = u.onerror = resolve;
+            synth.speak(u);
+          });
         },
         stop,
       };
@@ -800,6 +807,107 @@
         .map((l) => l.replace(/^#+\s*/, "").replace(/^[-*]\s+/, "• ").trim())
         .filter(Boolean)
         .map((l, i) => (i === 0 ? [l, "c1"] : [l]));
+    }
+
+    // Find the first "A → B → C" line in an answer; return its boxes and the remaining text
+    function splitFlow(text) {
+      const lines = text.split(/\n+/);
+      const i = lines.findIndex((l) => /→|->/.test(l));
+      if (i === -1) return { flow: null, rest: text };
+      const nodes = lines[i]
+        .replace(/\*\*|__|`/g, "")
+        .replace(/^\s*[-*•]\s+/, "")
+        .split(/\s*(?:→|->)\s*/)
+        .map((n) => n.replace(/[.;:,]+$/, "").trim())
+        .filter(Boolean)
+        .slice(0, 9);
+      if (nodes.length < 2) return { flow: null, rest: text };
+      return { flow: { nodes }, rest: lines.filter((_, j) => j !== i).join("\n") };
+    }
+
+    // Animate a path as if drawn in chalk
+    async function stroke(path, ms) {
+      const len = path.getTotalLength();
+      path.style.strokeDasharray = len;
+      path.style.strokeDashoffset = len;
+      if (reduceMotion) { path.style.strokeDashoffset = 0; return; }
+      path.getBoundingClientRect();
+      path.style.transition = `stroke-dashoffset ${ms}ms ease`;
+      path.style.strokeDashoffset = 0;
+      await wait(ms);
+    }
+
+    // Draw the flow as chalk boxes, up to 3 per row in a zig-zag, narrating while drawing
+    const CHALK = ["#f8e27a", "#8fd3fe", "#f6a6c8", "#a6e3a1", "#ffb37a", "#c9a7ff"];
+    async function drawFlow(flow, id) {
+      const NS = "http://www.w3.org/2000/svg";
+      const W = 324, BW = 92, BH = 44, GAP = 24, ROW_GAP = 32, PER_ROW = 3;
+      const n = flow.nodes.length, rows = Math.ceil(n / PER_ROW);
+      const offset = n < PER_ROW ? (W - (n * BW + (n - 1) * GAP)) / 2 : 0;
+      const pos = flow.nodes.map((_, i) => {
+        const r = Math.floor(i / PER_ROW), c = i % PER_ROW;
+        const col = r % 2 === 0 ? c : PER_ROW - 1 - c;
+        return { x: offset + col * (BW + GAP), y: 4 + r * (BH + ROW_GAP), r };
+      });
+
+      const el = (tag, attrs, parent) => {
+        const e = document.createElementNS(NS, tag);
+        for (const k in attrs) e.setAttribute(k, attrs[k]);
+        parent.appendChild(e);
+        return e;
+      };
+      const wrap = document.createElement("div");
+      wrap.className = "gb-diagram";
+      const svg = el("svg", { viewBox: `0 0 ${W} ${8 + rows * BH + (rows - 1) * ROW_GAP}`, role: "img", "aria-label": flow.nodes.join(", then ") }, wrap);
+      const g = el("g", { filter: "url(#chalk)", fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }, svg);
+      textEl.appendChild(wrap);
+
+      // Labels are set with textContent, so nothing from the AI is ever parsed as HTML
+      function label(p, text, color) {
+        const t = text.length > 26 ? text.slice(0, 25) + "…" : text;
+        let lines = [t];
+        const words = t.split(" ");
+        if (t.length > 12 && words.length > 1) {
+          let best = 1;
+          for (let k = 1; k < words.length; k++) {
+            const diff = (s) => Math.abs(words.slice(0, s).join(" ").length - words.slice(s).join(" ").length);
+            if (diff(k) < diff(best)) best = k;
+          }
+          lines = [words.slice(0, best).join(" "), words.slice(best).join(" ")];
+        }
+        const cx = p.x + BW / 2;
+        const txt = el("text", { x: cx, y: p.y + BH / 2 + (lines.length === 1 ? 4.5 : -2.5), "text-anchor": "middle", fill: color, class: "gb-label" }, svg);
+        lines.forEach((ln, k) => { el("tspan", { x: cx, dy: k === 0 ? 0 : 14 }, txt).textContent = ln; });
+      }
+
+      guideEl.classList.add("writing");
+      const narration = voice.speak(flow.nodes.join(" → "));
+      for (let i = 0; i < n; i++) {
+        if (id !== runId) return false;
+        const p = pos[i], color = CHALK[i % CHALK.length];
+        if (i > 0) {
+          const a = pos[i - 1];
+          let d, head;
+          if (a.r === p.r) {
+            const toRight = p.x > a.x, y = a.y + BH / 2;
+            const x1 = toRight ? a.x + BW + 3 : a.x - 3, x2 = toRight ? p.x - 4 : p.x + BW + 4, s = toRight ? -1 : 1;
+            d = `M${x1} ${y} L${x2} ${y}`;
+            head = `M${x2 + s * 7} ${y - 5} L${x2} ${y} L${x2 + s * 7} ${y + 5}`;
+          } else {
+            const x = a.x + BW / 2, y1 = a.y + BH + 3, y2 = p.y - 4;
+            d = `M${x} ${y1} L${x} ${y2}`;
+            head = `M${x - 5} ${y2 - 7} L${x} ${y2} L${x + 5} ${y2 - 7}`;
+          }
+          await stroke(el("path", { d, stroke: "#f3f0e6", "stroke-width": 2 }, g), 260);
+          await stroke(el("path", { d: head, stroke: "#f3f0e6", "stroke-width": 2 }, g), 120);
+        }
+        await stroke(el("rect", { x: p.x, y: p.y, width: BW, height: BH, rx: 9, stroke: color, "stroke-width": 2.4 }, g), 420);
+        label(p, flow.nodes[i], color);
+        textEl.scrollTop = textEl.scrollHeight;
+      }
+      // Let the narration finish before the explanation is written underneath
+      await Promise.race([narration, wait(12000)]);
+      return id === runId;
     }
 
     async function walk(ms = 900) {
@@ -928,7 +1036,9 @@
       askForm.querySelectorAll("input, button").forEach((el) => (el.disabled = false));
       if (id !== runId) return;
       thinking.remove();
-      await write(toLines(reply), { append: true });
+      const { flow, rest } = splitFlow(reply);
+      if (flow && !(await drawFlow(flow, id))) return;
+      await write(toLines(rest), { append: true });
       menuChips();
       input.focus();
     });
