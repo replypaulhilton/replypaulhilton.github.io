@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Post Studio | Hilton Paul</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Cabin+Sketch:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --board: #1f2622;
+    --frame: #6b4a2f;
+    --ink: #f3f0e6;
+    --muted: #b9bdb3;
+    --line: rgba(243, 240, 230, 0.35);
+    --yellow: #f8e27a;
+    --hand: "Architects Daughter", "Comic Sans MS", cursive;
+    --sketch: "Cabin Sketch", "Architects Daughter", cursive;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--hand); font-size: 17px; color: var(--ink); background: var(--board); min-height: 100vh; }
+  a { color: var(--yellow); }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 16px 60px; }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px; margin-bottom: 24px; }
+  h1 { font-family: var(--sketch); font-size: clamp(30px, 4vw, 42px); }
+  header p { color: var(--muted); }
+  .layout { display: grid; gap: 28px; }
+  @media (min-width: 920px) { .layout { grid-template-columns: 380px 1fr; align-items: start; } }
+
+  .panel { display: grid; gap: 16px; }
+  .group { border: 2px solid var(--line); padding: 14px 16px; border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px; }
+  .group h2 { font-family: var(--sketch); font-size: 22px; margin-bottom: 8px; }
+  label { display: block; color: var(--muted); font-size: 15px; margin: 10px 0 4px; }
+  input[type="text"], textarea, select {
+    width: 100%; background: rgba(0, 0, 0, 0.2); border: 1.5px dashed var(--line); border-radius: 8px;
+    color: var(--ink); font-family: var(--hand); font-size: 16px; padding: 8px 10px; outline: none;
+  }
+  input[type="text"]:focus, textarea:focus, select:focus { border-color: var(--yellow); }
+  textarea { resize: vertical; min-height: 84px; line-height: 1.45; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .row > * { flex: 1; min-width: 0; }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+    font-family: var(--hand); font-size: 17px; color: var(--ink); background: transparent; padding: 8px 18px;
+    border: 2.5px solid var(--line); border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    transition: transform 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .btn:hover:not(:disabled) { transform: rotate(-1.5deg); border-color: var(--yellow); color: var(--yellow); }
+  .btn.primary { border-color: var(--yellow); color: var(--yellow); }
+  .btn:disabled { opacity: 0.5; cursor: wait; }
+  .status { color: var(--muted); font-size: 14px; min-height: 20px; margin-top: 6px; }
+  input[type="range"] { width: 100%; accent-color: var(--yellow); }
+
+  .preview { position: sticky; top: 16px; display: grid; gap: 14px; justify-items: center; }
+  .preview canvas {
+    width: 100%; max-width: 560px; height: auto; display: block;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); border-radius: 4px;
+  }
+  .preview .row { width: 100%; max-width: 560px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Post Studio</h1>
+    <p>Chalkboard diagrams for LinkedIn, with my watermark. <a href="./">Back to the site</a></p>
+  </header>
+
+  <div class="layout">
+    <form class="panel" id="studio" autocomplete="off" onsubmit="return false">
+      <div class="group">
+        <h2>1. Topic</h2>
+        <label for="topic">What should the post explain?</label>
+        <div class="row">
+          <input type="text" id="topic" placeholder="e.g. How I'd design a URL shortener" maxlength="200" />
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button type="button" class="btn primary" id="generate">✎ Generate with AI</button>
+        </div>
+        <div class="status" id="status" aria-live="polite"></div>
+      </div>
+
+      <div class="group">
+        <h2>2. Content</h2>
+        <label for="title">Title</label>
+        <input type="text" id="title" value="Designing a URL Shortener" maxlength="80" />
+        <label for="flow">Flow (boxes separated by → or -&gt;)</label>
+        <input type="text" id="flow" value="Client → API Gateway → Key Service → Redis Cache → Database" />
+        <p class="hint">Up to 9 boxes. They zig-zag 3 per row.</p>
+        <label for="tradeoffs">Trade-offs (one per line, up to 3)</label>
+        <textarea id="tradeoffs">Short keys vs collision risk
+Cache speed vs stale redirects
+SQL consistency vs NoSQL write scale</textarea>
+      </div>
+
+      <div class="group">
+        <h2>3. Look</h2>
+        <div class="row">
+          <div>
+            <label for="size">Size</label>
+            <select id="size">
+              <option value="portrait">Portrait 1080 × 1350</option>
+              <option value="square">Square 1080 × 1080</option>
+            </select>
+          </div>
+          <div>
+            <label for="theme">Board</label>
+            <select id="theme">
+              <option value="chalk">Chalkboard</option>
+              <option value="white">Whiteboard</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="wm-pos">Watermark</label>
+            <select id="wm-pos">
+              <option value="br">Bottom right</option>
+              <option value="bl">Bottom left</option>
+              <option value="off">Off</option>
+            </select>
+          </div>
+          <div>
+            <label for="wm-opacity">Watermark strength</label>
+            <input type="range" id="wm-opacity" min="0.3" max="1" step="0.05" value="0.8" />
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>4. Caption</h2>
+        <label for="caption">Post text for LinkedIn</label>
+        <textarea id="caption" style="min-height:110px">Every short link hides a small distributed system. Here's how I'd sketch it on a whiteboard, and the trade-offs I'd talk through.
+#SystemDesign #SoftwareArchitecture #Azure</textarea>
+        <div class="row" style="margin-top:10px">
+          <button type="button" class="btn" id="copy-caption">Copy caption</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="preview">
+      <canvas id="post" width="1080" height="1350" aria-label="Post preview"></canvas>
+      <div class="row">
+        <button type="button" class="btn primary" id="download">⬇ Download PNG</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Same chatbot as the main site; the Worker only accepts requests from the site itself
+  const CHAT_ENDPOINT = "https://hilton-chat.hiltonpaul.workers.dev/chat";
+
+  const THEMES = {
+    chalk: {
+      board: "#1f2622", frame: "#6b4a2f", ink: "#f3f0e6", muted: "#b9bdb3", grain: "rgba(255,255,255,0.05)",
+      palette: ["#f8e27a", "#8fd3fe", "#f6a6c8", "#a6e3a1", "#ffb37a", "#c9a7ff"], speckle: true,
+    },
+    white: {
+      board: "#f7f7f2", frame: "#b8bcc2", ink: "#22252a", muted: "#5d636b", grain: "rgba(0,0,0,0.035)",
+      palette: ["#b7791f", "#1d4ed8", "#c026d3", "#15803d", "#ea580c", "#7c3aed"], speckle: false,
+    },
+  };
+  const SIZES = { portrait: [1080, 1350], square: [1080, 1080] };
+  const HAND = '"Architects Daughter", cursive';
+  const SKETCH = '"Cabin Sketch", cursive';
+
+  const $ = (id) => document.getElementById(id);
+  const canvas = $("post");
+  const ctx = canvas.getContext("2d");
+  const face = new Image();
+  face.src = "hilton-face.png";
+
+  // Seeded random so the chalk texture stays the same while you type
+  function rng(seed) {
+    return () => {
+      seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function wrapText(text, maxWidth) {
+    const words = text.split(/\s+/).filter(Boolean);
+    const lines = [];
+    let line = "";
+    for (const w of words) {
+      const test = line ? line + " " + w : w;
+      if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = w; } else line = test;
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function readContent() {
+    const nodes = $("flow").value.split(/\s*(?:→|->)\s*/).map((s) => s.trim()).filter(Boolean).slice(0, 9);
+    const tradeoffs = $("tradeoffs").value.split("\n").map((s) => s.replace(/^[-*•]\s*/, "").trim()).filter(Boolean).slice(0, 3);
+    return { title: $("title").value.trim(), nodes, tradeoffs };
+  }
+
+  // ---------- chalk drawing helpers ----------
+  let rand = rng(1);
+  function roughRoundRect(x, y, w, h, r, color, width = 5) {
+    for (let pass = 0; pass < 3; pass++) {
+      const j = () => (rand() - 0.5) * 3;
+      ctx.beginPath();
+      ctx.roundRect(x + j(), y + j(), w + j(), h + j(), r);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = pass === 0 ? 0.95 : 0.4;
+      ctx.lineWidth = pass === 0 ? width : width * 0.6;
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+  function roughLine(x1, y1, x2, y2, color, width = 4) {
+    for (let pass = 0; pass < 2; pass++) {
+      const j = () => (rand() - 0.5) * 2.5;
+      ctx.beginPath();
+      ctx.moveTo(x1 + j(), y1 + j());
+      ctx.quadraticCurveTo((x1 + x2) / 2 + j() * 2, (y1 + y2) / 2 + j() * 2, x2 + j(), y2 + j());
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = pass === 0 ? 0.9 : 0.4;
+      ctx.lineWidth = width;
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+  function arrow(x1, y1, x2, y2, color) {
+    roughLine(x1, y1, x2, y2, color, 4);
+    const a = Math.atan2(y2 - y1, x2 - x1), s = 18;
+    roughLine(x2, y2, x2 - s * Math.cos(a - 0.45), y2 - s * Math.sin(a - 0.45), color, 4);
+    roughLine(x2, y2, x2 - s * Math.cos(a + 0.45), y2 - s * Math.sin(a + 0.45), color, 4);
+  }
+  function chalkText(text, x, y, font, color, align = "left") {
+    ctx.font = font;
+    ctx.textAlign = align;
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.95;
+    ctx.fillText(text, x, y);
+    ctx.globalAlpha = 0.35;
+    ctx.fillText(text, x + 1, y + 1);
+    ctx.globalAlpha = 1;
+  }
+  // Tiny gaps in board color make strokes and letters look like chalk
+  function speckle(x, y, w, h, theme, density = 0.004) {
+    if (!theme.speckle) return;
+    ctx.fillStyle = theme.board;
+    const count = Math.floor(w * h * density);
+    for (let i = 0; i < count; i++) {
+      ctx.globalAlpha = 0.35 + rand() * 0.4;
+      ctx.fillRect(x + rand() * w, y + rand() * h, 1 + rand() * 1.6, 1 + rand() * 1.6);
+    }
+    ctx.globalAlpha = 1;
+  }
+  function wavyUnderline(x, y, w, color) {
+    ctx.beginPath();
+    for (let i = 0; i <= w; i += 4) ctx.lineTo(x + i, y + Math.sin(i / 9) * 5);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 4;
+    ctx.globalAlpha = 0.9;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  // ---------- layout + render ----------
+  // Lays out title, diagram and trade-offs from the top; returns the bottom y.
+  // With draw=false it only measures, so the content can be scaled to fit.
+  function layoutContent(c, W, theme, top, draw) {
+    const pad = 90, inner = W - pad * 2;
+    let y = top;
+
+    ctx.font = `28px ${HAND}`;
+    if (draw) chalkText("TODAY'S LESSON · SYSTEM DESIGN", pad, y, `28px ${HAND}`, theme.muted);
+    y += 82;
+
+    ctx.font = `700 74px ${SKETCH}`;
+    const titleLines = wrapText(c.title || "Untitled", inner).slice(0, 2);
+    titleLines.forEach((ln, i) => {
+      if (draw) {
+        chalkText(ln, pad, y + i * 84, `700 74px ${SKETCH}`, theme.ink);
+        speckle(pad, y + i * 84 - 64, ctx.measureText(ln).width, 76, theme, 0.006);
+      }
+    });
+    y += (titleLines.length - 1) * 84;
+    if (draw) {
+      ctx.font = `700 74px ${SKETCH}`;
+      const uw = Math.min(inner, Math.max(...titleLines.map((l) => ctx.measureText(l).width)));
+      wavyUnderline(pad, y + 26, Math.min(uw, 420), theme.palette[0]);
+    }
+    y += 100;
+
+    // Diagram: up to 3 boxes per row, zig-zagging like the site's chalkboard
+    const n = c.nodes.length;
+    if (n) {
+      const PER = 3, BW = 270, BH = 118, GAP = (inner - PER * BW) / (PER - 1), RG = 86;
+      const rows = Math.ceil(n / PER);
+      const offset = n < PER ? (inner - (n * BW + (n - 1) * GAP)) / 2 : 0;
+      const pos = c.nodes.map((_, i) => {
+        const r = Math.floor(i / PER), col = r % 2 === 0 ? i % PER : PER - 1 - (i % PER);
+        return { x: pad + offset + col * (BW + GAP), y: y + r * (BH + RG), r };
+      });
+      if (draw) {
+        c.nodes.forEach((label, i) => {
+          const p = pos[i], color = theme.palette[i % theme.palette.length];
+          if (i > 0) {
+            const a = pos[i - 1];
+            if (a.r === p.r) {
+              const right = p.x > a.x, my = a.y + BH / 2;
+              arrow(right ? a.x + BW + 8 : a.x - 8, my, right ? p.x - 10 : p.x + BW + 10, my, theme.ink);
+            } else {
+              const mx = a.x + BW / 2;
+              arrow(mx, a.y + BH + 8, mx, p.y - 10, theme.ink);
+            }
+          }
+          roughRoundRect(p.x, p.y, BW, BH, 18, color, 5);
+          ctx.font = `34px ${HAND}`;
+          const lines = wrapText(label, BW - 30).slice(0, 2);
+          const startY = p.y + BH / 2 + (lines.length === 1 ? 12 : -8);
+          lines.forEach((ln, k) => chalkText(ln, p.x + BW / 2, startY + k * 40, `34px ${HAND}`, color, "center"));
+          speckle(p.x - 6, p.y - 6, BW + 12, BH + 12, theme, 0.0025);
+        });
+      }
+      y += rows * BH + (rows - 1) * RG + 100;
+    }
+
+    // Trade-offs
+    if (c.tradeoffs.length) {
+      if (draw) chalkText("Trade-offs", pad, y, `700 48px ${SKETCH}`, theme.palette[3]);
+      y += 62;
+      ctx.font = `32px ${HAND}`;
+      c.tradeoffs.forEach((t) => {
+        const lines = wrapText(t, inner - 44);
+        lines.forEach((ln, k) => {
+          if (draw) {
+            if (k === 0) {
+              ctx.beginPath();
+              ctx.arc(pad + 12, y - 10, 6, 0, Math.PI * 2);
+              ctx.fillStyle = theme.palette[3];
+              ctx.fill();
+            }
+            chalkText(ln, pad + 40, y, `32px ${HAND}`, theme.ink);
+          }
+          y += 46;
+        });
+        y += 8;
+      });
+    }
+    return y;
+  }
+
+  function drawBoard(W, H, theme) {
+    rand = rng(42);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = theme.board;
+    ctx.fillRect(0, 0, W, H);
+    // Smudges and chalk dust
+    [[0.2, 0.15], [0.8, 0.55], [0.4, 0.9]].forEach(([fx, fy]) => {
+      const g = ctx.createRadialGradient(W * fx, H * fy, 0, W * fx, H * fy, W * 0.45);
+      g.addColorStop(0, theme.grain.replace(/[\d.]+\)$/, "0.06)"));
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
+    });
+    ctx.fillStyle = theme.grain;
+    for (let i = 0; i < 26000; i++) ctx.fillRect(rand() * W, rand() * H, 1.3, 1.3);
+    // Wooden frame and chalk tray
+    const F = 26;
+    ctx.strokeStyle = theme.frame;
+    ctx.lineWidth = F * 2;
+    ctx.strokeRect(0, 0, W, H);
+    ctx.fillStyle = theme.frame;
+    ctx.fillRect(W * 0.18, H - F - 14, W * 0.3, 10);
+    theme.palette.slice(0, 4).forEach((c, i) => {
+      ctx.fillStyle = i === 0 ? theme.ink : c;
+      ctx.beginPath();
+      ctx.roundRect(W * 0.2 + i * 70, H - F - 22, 46, 9, 4);
+      ctx.fill();
+    });
+  }
+
+  function drawWatermark(W, H, theme) {
+    const pos = $("wm-pos").value;
+    const F = 26, R = 46, boxW = 380;
+    // A small call to action in the corner opposite the watermark
+    const cta = "Follow for more system design ✎";
+    const ctaY = H - F - 50 - R + 10;
+    if (pos === "br") chalkText(cta, F + 64, ctaY, `30px ${HAND}`, theme.palette[2]);
+    else if (pos === "bl") chalkText(cta, W - F - 64, ctaY, `30px ${HAND}`, theme.palette[2], "right");
+    else chalkText(cta, W / 2, ctaY, `30px ${HAND}`, theme.palette[2], "center");
+    if (pos === "off") return;
+    const x = pos === "br" ? W - F - 34 - boxW : F + 34;
+    const y = H - F - 50 - R * 2;
+    ctx.globalAlpha = +$("wm-opacity").value;
+    // Face in a chalk circle
+    const cx = x + R, cy = y + R;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.fillStyle = "#d6d6d6";
+    ctx.fill();
+    ctx.clip();
+    if (face.complete && face.naturalWidth) {
+      const fw = R * 2.05, fh = fw * (face.naturalHeight / face.naturalWidth);
+      ctx.drawImage(face, cx - fw / 2, cy - R * 1.05, fw, fh);
+    }
+    ctx.restore();
+    ctx.globalAlpha = +$("wm-opacity").value;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 3, 0, Math.PI * 2);
+    ctx.strokeStyle = theme.palette[0];
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.font = `700 34px ${SKETCH}`;
+    ctx.textAlign = "left";
+    ctx.fillStyle = theme.ink;
+    ctx.fillText("Hilton Paul", x + R * 2 + 20, cy - 4);
+    ctx.font = `24px ${HAND}`;
+    ctx.fillStyle = theme.muted;
+    ctx.fillText("replypaulhilton.github.io", x + R * 2 + 20, cy + 30);
+    ctx.globalAlpha = 1;
+  }
+
+  function render() {
+    const [W, H] = SIZES[$("size").value];
+    const theme = THEMES[$("theme").value];
+    if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+    const c = readContent();
+    drawBoard(W, H, theme);
+
+    // Measure, then shrink the content if it would run into the watermark area
+    const top = 120, bottomReserve = 190;
+    const height = layoutContent(c, W, theme, top, false) - top;
+    const avail = H - top - bottomReserve;
+    const scale = Math.min(1, avail / height);
+    // Short posts sit in the middle of the board instead of leaving a gap at the bottom
+    const shift = Math.max(0, (avail - height * scale) / 2);
+    ctx.save();
+    ctx.translate(0, shift);
+    ctx.translate(W / 2, top);
+    ctx.scale(scale, scale);
+    ctx.translate(-W / 2, -top);
+    rand = rng(7);
+    layoutContent(c, W, theme, top, true);
+    ctx.restore();
+
+    drawWatermark(W, H, theme);
+  }
+
+  // Put hashtags on their own line and make multi-word ones valid: "#rate limiting" → "#RateLimiting"
+  function tidyCaption(text) {
+    const i = text.indexOf("#");
+    if (i === -1) return text;
+    const tags = text.slice(i).split("#").map((t) => t.trim()).filter(Boolean)
+      .map((t) => "#" + t.split(/\s+/).map((w) => w[0].toUpperCase() + w.slice(1)).join(""));
+    return text.slice(0, i).trim() + "\n" + tags.join(" ");
+  }
+
+  // ---------- AI generate ----------
+  async function generate() {
+    const topic = $("topic").value.trim();
+    if (!topic) { $("status").textContent = "Type a topic first."; return; }
+    const btn = $("generate");
+    btn.disabled = true;
+    $("status").textContent = "Thinking…";
+    const question = `Create content for a LinkedIn post diagram about: ${topic}
+Reply in exactly this format and nothing else:
+TITLE: <a title of at most 6 words>
+FLOW: <4 to 7 short component names separated by →>
+TRADEOFF: <one short trade-off, max 8 words>
+TRADEOFF: <one short trade-off, max 8 words>
+TRADEOFF: <one short trade-off, max 8 words>
+CAPTION: <two short sentences in first person about how you would approach it (do not claim you built it), then 3 one-word hashtags>`;
+    try {
+      const res = await fetch(CHAT_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+        signal: AbortSignal.timeout(30000),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.answer) throw new Error(res.status === 429 ? "busy" : data.error || res.status);
+      const get = (key) => data.answer.split("\n").filter((l) => l.trim().toUpperCase().startsWith(key + ":")).map((l) => l.slice(l.indexOf(":") + 1).trim());
+      const title = get("TITLE")[0], flow = get("FLOW")[0], trade = get("TRADEOFF"), caption = get("CAPTION")[0];
+      if (!flow) throw new Error("no flow");
+      if (title) $("title").value = title;
+      $("flow").value = flow;
+      if (trade.length) $("tradeoffs").value = trade.join("\n");
+      if (caption) $("caption").value = tidyCaption(caption);
+      $("status").textContent = "Done. Edit anything, then download.";
+      render();
+    } catch (e) {
+      $("status").textContent = e.message === "busy"
+        ? "The AI is busy right now. Try again in a minute."
+        : "Couldn't generate this time. Try again, or type the content yourself.";
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ---------- wiring ----------
+  ["title", "flow", "tradeoffs", "size", "theme", "wm-pos", "wm-opacity"].forEach((id) => $(id).addEventListener("input", render));
+  $("generate").addEventListener("click", generate);
+  $("topic").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); generate(); } });
+  $("download").addEventListener("click", () => {
+    canvas.toBlob((blob) => {
+      const a = document.createElement("a");
+      const slug = ($("title").value || "post").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      a.href = URL.createObjectURL(blob);
+      a.download = `hilton-${slug || "post"}.png`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }, "image/png");
+  });
+  $("copy-caption").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText($("caption").value);
+      $("copy-caption").textContent = "Copied ✓";
+    } catch (e) {
+      $("caption").select();
+      $("copy-caption").textContent = "Press Ctrl+C";
+    }
+    setTimeout(() => ($("copy-caption").textContent = "Copy caption"), 1800);
+  });
+
+  // Fonts must be loaded before drawing, or the canvas falls back to a plain font
+  Promise.all([
+    document.fonts.load(`700 74px ${SKETCH}`),
+    document.fonts.load(`34px ${HAND}`),
+  ]).finally(render);
+  face.onload = render;
+</script>
+</body>
+</html>
