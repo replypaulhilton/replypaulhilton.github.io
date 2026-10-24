@@ -87,7 +87,60 @@
   .c-green { color: var(--green); }
   .c-orange { color: var(--orange); }
   .c-purple { color: var(--purple); }
-  .scribble { text-decoration: underline wavy; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+  /* Wavy chalk underline that draws itself after its heading is written */
+  .scribble { position: relative; white-space: nowrap; }
+  .scribble::after {
+    content: ""; position: absolute; left: -2px; right: -2px; bottom: -7px; height: 9px; background: var(--yellow);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 10'%3E%3Cpath d='M0 5 Q6 0 12 5 T24 5' fill='none' stroke='black' stroke-width='2.4'/%3E%3C/svg%3E") repeat-x left center / 24px 9px;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 10'%3E%3Cpath d='M0 5 Q6 0 12 5 T24 5' fill='none' stroke='black' stroke-width='2.4'/%3E%3C/svg%3E") repeat-x left center / 24px 9px;
+    clip-path: inset(0 100% 0 0);
+  }
+  .reveal.in .scribble::after { animation: underline-draw 0.6s ease-out 1.25s forwards; }
+  @keyframes underline-draw { to { clip-path: inset(0 0 0 0); } }
+
+  /* Section headings written left to right, with a chalk stick moving along */
+  .h-write { position: relative; display: inline-block; }
+  .h-ink { display: inline-block; clip-path: inset(-12px 100% -16px 0); }
+  .reveal.in .h-ink { animation: chalk-write 1.1s ease-in-out 0.15s forwards; }
+  @keyframes chalk-write { to { clip-path: inset(-12px 0 -16px 0); } }
+  .h-stick {
+    position: absolute; bottom: 4px; left: 0; width: 30px; height: 8px; border-radius: 3px; opacity: 0;
+    background: var(--ink); box-shadow: 0 0 6px rgba(255, 255, 255, 0.25); transform: rotate(-35deg); pointer-events: none;
+  }
+  .reveal.in .h-stick { animation: stick-move 1.1s ease-in-out 0.15s forwards; }
+  @keyframes stick-move {
+    0% { left: 0; opacity: 0; }
+    10% { opacity: 1; }
+    30% { transform: rotate(-35deg) translateY(-8px); }
+    55% { transform: rotate(-30deg) translateY(2px); }
+    80% { transform: rotate(-38deg) translateY(-6px); opacity: 1; }
+    100% { left: calc(100% - 10px); opacity: 0; }
+  }
+
+  /* Eraser wipe when switching between chalkboard and whiteboard */
+  .wipe { position: fixed; inset: 0; z-index: 95; pointer-events: none; clip-path: inset(0 100% 0 0); animation: wipe-reveal 0.75s linear forwards; }
+  .wipe.chalk-bg { background: #1f2622; }
+  .wipe.white-bg { background: #f7f7f2; }
+  .wipe.done { opacity: 0; transition: opacity 0.35s; }
+  @keyframes wipe-reveal { to { clip-path: inset(0 0 0 0); } }
+  .eraser {
+    position: fixed; z-index: 96; top: 50%; left: -170px; width: 150px; margin-top: -32px; pointer-events: none;
+    animation: eraser-move 0.75s linear forwards;
+  }
+  .eraser .wood { height: 34px; background: linear-gradient(#a8763f, #7a4f28); border: 2px solid #4d2f14; border-radius: 10px 10px 4px 4px; }
+  .eraser .felt { height: 24px; background: repeating-linear-gradient(90deg, #5b5b5b 0 3px, #474747 3px 6px); border: 2px solid #2b2b2b; border-top: 0; border-radius: 0 0 6px 6px; }
+  .eraser::before {
+    content: ""; position: absolute; right: 100%; top: -10px; width: 90px; height: 84px; filter: blur(6px);
+    background: radial-gradient(ellipse at right, rgba(243, 240, 230, 0.45), transparent 70%);
+  }
+  @keyframes eraser-move {
+    /* The eraser's right edge rides the wipe's edge (left: -170px, width: 150px) */
+    0% { transform: translate(20px, 0) rotate(-8deg); }
+    25% { transform: translate(calc(25vw + 20px), -30vh) rotate(-4deg); }
+    50% { transform: translate(calc(50vw + 20px), 25vh) rotate(-11deg); }
+    75% { transform: translate(calc(75vw + 20px), -20vh) rotate(-5deg); }
+    100% { transform: translate(calc(100vw + 190px), 0) rotate(-8deg); }
+  }
 
   /* Nav */
   nav { padding-top: 22px; }
@@ -146,6 +199,14 @@
   .fade-late { opacity: 0; animation: fadeIn 0.6s ease forwards; }
   @keyframes fadeIn { to { opacity: 1; } }
 
+  /* Clickable boxes in the hero diagram */
+  .hd-node { cursor: pointer; outline: none; }
+  .hd-node .box { fill: transparent; transition: stroke-width 0.25s, filter 0.25s; }
+  .hd-node:hover .box, .hd-node:focus-visible .box { stroke-width: 3.6; filter: drop-shadow(0 0 7px currentColor); }
+  .hd-node:hover text:not(.small), .hd-node:focus-visible text:not(.small) { fill: currentColor; }
+  .board-svg .wire.hot { stroke: var(--yellow); opacity: 1; stroke-width: 2.6; animation: wire-flow 0.6s linear infinite; }
+  @keyframes wire-flow { to { stroke-dashoffset: -26; } }
+
   /* Stats */
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; padding-bottom: 40px; }
   .stat { text-align: left; padding: 6px 0 6px 18px; border-left: 3px solid var(--line); }
@@ -156,7 +217,6 @@
   section { padding-top: 88px; padding-bottom: 40px; }
   .topic { font-size: 17px; color: var(--muted); margin-bottom: 6px; }
   h2 { font-family: var(--sketch); font-weight: 700; font-size: clamp(32px, 4.6vw, 48px); line-height: 1.15; margin-bottom: 32px; }
-  h2 .scribble { text-decoration-color: var(--yellow); }
 
   /* About */
   .about-grid { display: grid; gap: 40px; }
@@ -211,6 +271,10 @@
   @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }
     .draw { animation: none; stroke-dashoffset: 0; }
+    .h-ink, .reveal.in .h-ink { clip-path: none; animation: none; }
+    .h-stick { display: none; }
+    .scribble::after, .reveal.in .scribble::after { clip-path: none; animation: none; }
+    .board-svg .wire.hot { animation: none; }
     .fade-late { animation: none; opacity: 1; }
     .cursor, .scale .beam { animation: none; }
     .packet { display: none; }
@@ -380,32 +444,44 @@
 
     <!-- A chalk-drawn architecture of "me", with requests flowing through it -->
     <div class="diagram-wrap reveal" aria-label="Hand-drawn system diagram: a request goes from you, through a load balancer, to Cloud, AI agents and Microservices, and ends in production.">
-      <span class="note chalky">← how I work</span>
-      <svg class="board-svg chalky" viewBox="0 0 520 400" role="img">
+      <span class="note chalky">← tap a box</span>
+      <svg class="board-svg chalky" viewBox="0 0 520 400" role="group" aria-label="How I work: tap a box to have me explain it">
         <!-- Client -->
-        <rect class="box draw" x="190" y="12" width="140" height="48" rx="10" stroke="var(--yellow)" />
-        <text x="260" y="42" class="fade-late" style="animation-delay:.4s">you (client)</text>
+        <g class="hd-node" data-node="client" tabindex="0" role="button" aria-label="You, the client" style="color:var(--yellow)">
+          <rect class="box draw" x="190" y="12" width="140" height="48" rx="10" stroke="currentColor" />
+          <text x="260" y="42" class="fade-late" style="animation-delay:.4s">you (client)</text>
+        </g>
 
         <!-- Load balancer -->
-        <rect class="box draw" x="165" y="104" width="190" height="50" rx="10" stroke="var(--green)" style="animation-delay:.2s" />
-        <text x="260" y="134" class="fade-late" style="animation-delay:.6s">Hilton (load balancer)</text>
+        <g class="hd-node" data-node="lb" tabindex="0" role="button" aria-label="Hilton, the load balancer" style="color:var(--green)">
+          <rect class="box draw" x="165" y="104" width="190" height="50" rx="10" stroke="currentColor" style="animation-delay:.2s" />
+          <text x="260" y="134" class="fade-late" style="animation-delay:.6s">Hilton (load balancer)</text>
+        </g>
 
         <!-- Services -->
-        <rect class="box draw" x="10" y="208" width="140" height="58" rx="10" stroke="var(--blue)" style="animation-delay:.4s" />
-        <text x="80" y="236" class="fade-late" style="animation-delay:.8s">Cloud</text>
-        <text x="80" y="254" class="small fade-late" style="animation-delay:.8s">Azure · AWS</text>
+        <g class="hd-node" data-node="cloud" tabindex="0" role="button" aria-label="Cloud: Azure and AWS" style="color:var(--blue)">
+          <rect class="box draw" x="10" y="208" width="140" height="58" rx="10" stroke="currentColor" style="animation-delay:.4s" />
+          <text x="80" y="236" class="fade-late" style="animation-delay:.8s">Cloud</text>
+          <text x="80" y="254" class="small fade-late" style="animation-delay:.8s">Azure · AWS</text>
+        </g>
 
-        <rect class="box draw" x="190" y="208" width="140" height="58" rx="10" stroke="var(--pink)" style="animation-delay:.5s" />
-        <text x="260" y="236" class="fade-late" style="animation-delay:.9s">AI Agents</text>
-        <text x="260" y="254" class="small fade-late" style="animation-delay:.9s">RAG · Foundry</text>
+        <g class="hd-node" data-node="ai" tabindex="0" role="button" aria-label="AI agents: RAG and Foundry" style="color:var(--pink)">
+          <rect class="box draw" x="190" y="208" width="140" height="58" rx="10" stroke="currentColor" style="animation-delay:.5s" />
+          <text x="260" y="236" class="fade-late" style="animation-delay:.9s">AI Agents</text>
+          <text x="260" y="254" class="small fade-late" style="animation-delay:.9s">RAG · Foundry</text>
+        </g>
 
-        <rect class="box draw" x="370" y="208" width="140" height="58" rx="10" stroke="var(--orange)" style="animation-delay:.6s" />
-        <text x="440" y="236" class="fade-late" style="animation-delay:1s">Microservices</text>
-        <text x="440" y="254" class="small fade-late" style="animation-delay:1s">.NET · Kafka</text>
+        <g class="hd-node" data-node="micro" tabindex="0" role="button" aria-label="Microservices: .NET and Kafka" style="color:var(--orange)">
+          <rect class="box draw" x="370" y="208" width="140" height="58" rx="10" stroke="currentColor" style="animation-delay:.6s" />
+          <text x="440" y="236" class="fade-late" style="animation-delay:1s">Microservices</text>
+          <text x="440" y="254" class="small fade-late" style="animation-delay:1s">.NET · Kafka</text>
+        </g>
 
         <!-- Production database cylinder -->
-        <path class="box draw" d="M195 322 a65 14 0 0 0 130 0 a65 14 0 0 0 -130 0 v48 a65 14 0 0 0 130 0 v-48" stroke="var(--purple)" style="animation-delay:.8s" />
-        <text x="260" y="364" class="fade-late" style="animation-delay:1.2s">production</text>
+        <g class="hd-node" data-node="prod" tabindex="0" role="button" aria-label="Production" style="color:var(--purple)">
+          <path class="box draw" d="M195 322 a65 14 0 0 0 130 0 a65 14 0 0 0 -130 0 v48 a65 14 0 0 0 130 0 v-48" stroke="currentColor" style="animation-delay:.8s" />
+          <text x="260" y="364" class="fade-late" style="animation-delay:1.2s">production</text>
+        </g>
 
         <!-- Wires -->
         <path id="w1" class="wire" d="M260 60 V104" />
@@ -663,7 +739,36 @@
     try { localStorage.setItem("board", theme); } catch (e) {}
   }
   try { setTheme(localStorage.getItem("board") || "chalk"); } catch (e) { setTheme("chalk"); }
-  themeBtn.addEventListener("click", () => setTheme(root.dataset.theme === "chalk" ? "white" : "chalk"));
+  // An eraser sweeps across and wipes the board into the other theme
+  let wiping = false;
+  themeBtn.addEventListener("click", () => {
+    const next = root.dataset.theme === "chalk" ? "white" : "chalk";
+    if (wiping) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return setTheme(next);
+    wiping = true;
+    const wipe = document.createElement("div");
+    wipe.className = `wipe ${next}-bg`;
+    const eraser = document.createElement("div");
+    eraser.className = "eraser";
+    eraser.innerHTML = '<div class="wood"></div><div class="felt"></div>';
+    document.body.append(wipe, eraser);
+    setTimeout(() => { setTheme(next); wipe.classList.add("done"); }, 760);
+    setTimeout(() => { wipe.remove(); eraser.remove(); wiping = false; }, 1150);
+  });
+
+  // Section headings: wrap their text so it can be "written" in chalk when scrolled into view
+  document.querySelectorAll("section h2").forEach((h) => {
+    const wrap = document.createElement("span");
+    wrap.className = "h-write";
+    const ink = document.createElement("span");
+    ink.className = "h-ink";
+    while (h.firstChild) ink.appendChild(h.firstChild);
+    const stick = document.createElement("span");
+    stick.className = "h-stick";
+    stick.setAttribute("aria-hidden", "true");
+    wrap.append(ink, stick);
+    h.appendChild(wrap);
+  });
 
   // Command palette (Ctrl/Cmd + K)
   const commands = [
@@ -1054,8 +1159,52 @@
     document.getElementById("gb-close").addEventListener("click", close);
     document.querySelectorAll("[data-tour]").forEach((b) => b.addEventListener("click", () => tour(0)));
 
-    return { open, close, tour, say: (text) => answer("", toLines(text)), setResponder: (fn) => { responder = fn; } };
+    // What Hilton writes when a box in the hero diagram is tapped, plus a deeper question for the chatbot
+    const topics = {
+      client: { lines: [["That's you! 👋", "c1"], ["Every request starts with a question."], ["Ask me anything below and I'll route it."]] },
+      lb: { lines: [["Me, the load balancer", "c4"], ["I route each problem to the right tool:"], ["cloud, AI or microservices."]], deeper: "How do you choose between microservices and a modular monolith?" },
+      cloud: { lines: [["Cloud: Azure and AWS", "c2"], ["AKS, Storage, Key Vault, EC2 and RDS."], ["I design to scale out, keep it secure,"], ["and ship with Azure DevOps pipelines."]], deeper: "How would you design a scalable, secure setup on Azure?" },
+      ai: { lines: [["AI agents and RAG", "c3"], ["Embeddings plus vector and hybrid search,"], ["document intelligence and Azure OpenAI."], ["Ground the AI in your own data."]], deeper: "How would you design a RAG system?" },
+      micro: { lines: [["Microservices", "c1"], [".NET Core services talking through Kafka,"], ["CDC for data sync, CQRS for reads vs writes,"], ["Redis caching and retries with backoff."]], deeper: "How would you design an event-driven microservices system?" },
+      prod: { lines: [["Production", "c3"], ["Where it all lands, and it has to stay up."], ["Logs, metrics and traces with ELK,"], ["Prometheus, Grafana and App Insights."]], deeper: "How do you make a system observable in production?" },
+    };
+
+    async function explain(key) {
+      const t = topics[key];
+      if (!t) return;
+      if (!isOpen) await open({ greet: false });
+      showQuestion("");
+      await walk(500);
+      if (!(await write(t.lines))) return;
+      setChips([
+        ...(t.deeper ? [["Go deeper →", () => ask(t.deeper)]] : []),
+        ["Back to questions", () => { textEl.innerHTML = ""; menuChips(); }],
+      ]);
+    }
+
+    async function ask(question) {
+      if (!isOpen) await open({ greet: false });
+      document.getElementById("gb-input").value = question;
+      askForm.requestSubmit();
+    }
+
+    return { open, close, tour, explain, ask, say: (text) => answer("", toLines(text)), setResponder: (fn) => { responder = fn; } };
   })();
+
+  // Hero diagram: hovering a box lights up its wires; tapping it has Hilton explain it
+  const NODE_WIRES = { client: ["w1"], lb: ["w1", "w2", "w3", "w4"], cloud: ["w2", "w5"], ai: ["w3", "w6"], micro: ["w4", "w7"], prod: ["w5", "w6", "w7"] };
+  document.querySelectorAll(".hd-node").forEach((node) => {
+    const wires = NODE_WIRES[node.dataset.node].map((id) => document.getElementById(id));
+    const light = (on) => wires.forEach((w) => w.classList.toggle("hot", on));
+    node.addEventListener("mouseenter", () => light(true));
+    node.addEventListener("mouseleave", () => light(false));
+    node.addEventListener("focus", () => light(true));
+    node.addEventListener("blur", () => light(false));
+    node.addEventListener("click", () => HiltonGuide.explain(node.dataset.node));
+    node.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); HiltonGuide.explain(node.dataset.node); }
+    });
+  });
 </script>
 </body>
 </html>
